@@ -2,9 +2,6 @@ name: Build and Publish Application Images
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 env:
   VERSION: 'latest'

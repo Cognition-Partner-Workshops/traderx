@@ -2,17 +2,6 @@ name: CVE Scanning
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 8,18 * * 1-5'
-  push:
-    paths:
-      - '**/build.gradle'
-      - '**/package.json'
-      - '**/package-lock.json'
-      - '**/*.csproj'
-      - '**/Dockerfile'
-      - '.github/workflows/*-ignore-list.xml'
-      - '.github/workflows/security.yml'
 
 jobs:
   node-modules-scan:
