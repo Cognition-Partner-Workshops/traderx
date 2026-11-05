@@ -2,7 +2,7 @@
     <div class="mb-3 row">
         <label class="col-sm-2 col-form-label me-3">Account</label>
         <div class="col-sm-8">
-            <input readonly disabled class="form-control" id="accountLabel" [value]="account?.displayName" />
+            <input readonly disabled class="form-control" id="accountLabel" [value]="$safeNavigationMigration(account?.displayName)" />
         </div>
     </div>
     <div class="mb-3 row">

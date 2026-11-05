@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, OnInit, TemplateRef, ChangeDetectionStrategy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { TradeTicket } from '../model/trade.model';
 import { Account } from '../model/account.model';
@@ -10,7 +10,9 @@ import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 @Component({
     selector: 'app-trade',
     templateUrl: './trade.component.html',
-    styleUrls: ['./trade.component.scss']
+    styleUrls: ['./trade.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class TradeComponent implements OnInit {
     accounts: Account[] = [];

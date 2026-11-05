@@ -1,10 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from "@angular/core";
 
 let id = 0;
 
 @Component({
     selector: 'app-ngx-dropdown',
-    templateUrl: './dropdown.component.html'
+    templateUrl: './dropdown.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class DropdownComponent implements OnInit {
     @Input() items: any[];

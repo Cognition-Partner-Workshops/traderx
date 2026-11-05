@@ -21,7 +21,7 @@ describe('Assign user to account tests', () => {
     waitForAsync(() => {
       TestBed.configureTestingModule({
         declarations: [AssignUserToAccountComponent],
-        imports: [DropdownModule, TypeaheadModule.forRoot(), BrowserAnimationsModule, AlertModule.forRoot(), FormsModule],
+        imports: [DropdownModule, TypeaheadModule, BrowserAnimationsModule, AlertModule, FormsModule],
         providers: [
           {
             provide: AccountService,

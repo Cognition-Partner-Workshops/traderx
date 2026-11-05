@@ -1,13 +1,15 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { TradeTicket } from 'main/app/model/trade.model';
 import { Stock } from 'main/app/model/symbol.model';
 import { Account } from 'main/app/model/account.model';
 import { TypeaheadMatch } from 'ngx-bootstrap/typeahead';
 
 @Component({
-  selector: 'app-trade-ticket',
-  templateUrl: './trade-ticket.component.html',
-  styleUrls: ['./trade-ticket.component.scss']
+    selector: 'app-trade-ticket',
+    templateUrl: './trade-ticket.component.html',
+    styleUrls: ['./trade-ticket.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class TradeTicketComponent implements OnInit {
 

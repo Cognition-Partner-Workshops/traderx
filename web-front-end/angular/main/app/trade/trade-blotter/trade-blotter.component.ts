@@ -1,5 +1,5 @@
 import { ColDef, GridApi, GridReadyEvent, GetRowIdParams } from 'ag-grid-community';
-import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Account } from 'main/app/model/account.model';
 import { PositionService } from 'main/app/service/position.service';
 import { Observable } from 'rxjs';
@@ -8,7 +8,9 @@ import { TradeFeedService } from 'main/app/service/trade-feed.service';
 
 @Component({
     selector: 'app-trade-blotter',
-    templateUrl: 'trade-blotter.component.html'
+    templateUrl: 'trade-blotter.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class TradeBlotterComponent implements OnChanges, OnDestroy {
     trades$: Observable<Trade[]>;
@@ -62,8 +64,8 @@ export class TradeBlotterComponent implements OnChanges, OnDestroy {
         this.gridApi.sizeColumnsToFit();
     }
 
-    getRowId(params: GetRowIdParams<any>):string {
-        return  `Trade-${params.data.id}`;
+    getRowId(params: GetRowIdParams<Trade>): string {
+        return `Trade-${params.data.id}`;
     }
 
     ngOnDestroy() {

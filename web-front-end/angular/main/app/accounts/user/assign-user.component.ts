@@ -1,5 +1,5 @@
 import { catchError } from 'rxjs/operators';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { Account } from 'main/app/model/account.model';
 import { User } from 'main/app/model/user.model';
 import { AccountService } from 'main/app/service/account.service';
@@ -9,7 +9,9 @@ import { map, noop, Observable, Observer, of, switchMap, tap } from 'rxjs';
 
 @Component({
     selector: 'app-assign-user',
-    templateUrl: 'assign-user.component.html'
+    templateUrl: 'assign-user.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class AssignUserToAccountComponent implements OnInit {
     @Input() accounts: any = [];
@@ -25,7 +27,7 @@ export class AssignUserToAccountComponent implements OnInit {
         this.users$ = new Observable((observer: Observer<string | undefined>) => {
             observer.next(this.search as string | undefined);
         }).pipe(
-            switchMap<string, Observable<User[]>>((query: string) => {
+            switchMap((query: string | undefined) => {
                 if (query && query.length > 2) {
                     return this.userService.getUsers(query).pipe(
                         map((data: User[]) => data || []),

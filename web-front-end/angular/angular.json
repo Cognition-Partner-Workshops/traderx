@@ -77,21 +77,21 @@
                 "serve": {
                     "builder": "@angular-devkit/build-angular:dev-server",
                     "options": {
-                        "browserTarget": "main-application:build"
+                      "buildTarget": "main-application:build"
                     },
                     "configurations": {
                         "production": {
-                            "browserTarget": "main-application:build:production"
+                          "buildTarget": "main-application:build:production"
                         },
                         "local": {
-                            "browserTarget": "main-application:build:local"
+                          "buildTarget": "main-application:build:local"
                         }
                     }
                 },
                 "extract-i18n": {
                     "builder": "@angular-devkit/build-angular:extract-i18n",
                     "options": {
-                        "browserTarget": "main-application:build"
+                      "buildTarget": "main-application:build"
                     }
                 },
                 "test": {
@@ -115,5 +115,31 @@
                 }
             }
         }
+    },
+    "schematics": {
+      "@schematics/angular:component": {
+        "type": "component"
+      },
+      "@schematics/angular:directive": {
+        "type": "directive"
+      },
+      "@schematics/angular:service": {
+        "type": "service"
+      },
+      "@schematics/angular:guard": {
+        "typeSeparator": "."
+      },
+      "@schematics/angular:interceptor": {
+        "typeSeparator": "."
+      },
+      "@schematics/angular:module": {
+        "typeSeparator": "."
+      },
+      "@schematics/angular:pipe": {
+        "typeSeparator": "."
+      },
+      "@schematics/angular:resolver": {
+        "typeSeparator": "."
+      }
     }
 }

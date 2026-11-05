@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed, tick, fakeAsync } from '@angular/core/testing';
+import { GetRowIdParams } from 'ag-grid-community';
+import { Trade } from 'main/app/model/trade.model';
 import { AgGridModule } from 'ag-grid-angular';
 import { TradeBlotterComponent } from './trade-blotter.component';
 import { PositionService } from 'main/app/service/position.service';
@@ -66,8 +68,8 @@ describe('TradeBlotterComponent', () => {
 
     });
 
-    it('getRowNodeId should return id from trade data', () => {
-        expect(component.getRowNodeId(trades[0])).toEqual(trades[0].id);
+    it('getRowId should return id from trade data', () => {
+        expect(component.getRowId({ data: trades[0] } as GetRowIdParams<Trade>)).toEqual(`Trade-${trades[0].id}`);
     });
 
 });

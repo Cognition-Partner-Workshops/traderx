@@ -15,9 +15,9 @@ import { DropdownModule } from '../dropdown/dropdown.module';
   imports: [
     CommonModule,
     FormsModule,
-    TypeaheadModule.forRoot(),
+    TypeaheadModule,
     DropdownModule,
-    AlertModule.forRoot(),
+    AlertModule,
     AgGridModule
   ],
   exports: [AccountComponent, EditAccountComponent, AssignUserToAccountComponent]
