@@ -32,8 +32,10 @@ public class PubSubConfig {
 
     
     @Bean 
-    public Subscriber<TradeOrder> tradeFeedHandler() {
+    public Subscriber<TradeOrder> tradeFeedHandler(
+            @Value("${trade.feed.publish.token:${TRADE_FEED_PUBLISH_TOKEN:}}") String tradeFeedToken) {
         TradeFeedHandler handler=new TradeFeedHandler();
+        handler.setAuthToken(tradeFeedToken);
         handler.setDefaultTopic("/trades");
         handler.setSocketAddress(tradeFeedAddress);
         return handler;

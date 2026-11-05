@@ -73,13 +73,6 @@ spec:
               name: trade-service
               port:
                 number: 8080
-        - path: /trade-processor(/|$)(.*)
-          pathType: Prefix
-          backend:
-            service:
-              name: trade-processor
-              port:
-                number: 8080
         - path: /traderx(/|$)(.*)
           pathType: Prefix
           backend:
