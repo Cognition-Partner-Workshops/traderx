@@ -3,6 +3,6 @@ import { StocksModule } from './stocks/stocks.module';
 import HealthModule from './health/health.module';
 
 @Module({
-    imports: [StocksModule,HealthModule]
+  imports: [StocksModule, HealthModule],
 })
 export class AppModule {}

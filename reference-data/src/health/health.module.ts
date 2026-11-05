@@ -3,8 +3,8 @@ import HealthController from './health.controller';
 import { TerminusModule } from '@nestjs/terminus';
 
 @Module({
-    imports: [TerminusModule],
-    controllers: [HealthController],
-    providers: []
+  imports: [TerminusModule],
+  controllers: [HealthController],
+  providers: [],
 })
 export default class HealthModule {}
