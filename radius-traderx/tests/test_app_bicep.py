@@ -64,6 +64,10 @@ class RadiusHardening(unittest.TestCase):
         runtimes = self.resource("database")["properties"]["properties"]["runtimes"]
         self.assertIn("/database/_data", runtimes)
 
+    def test_people_service_log_dir_is_writable(self):
+        runtimes = self.resource("people-service")["properties"]["properties"]["runtimes"]
+        self.assertIn("/app/Logs", runtimes)
+
 
 if __name__ == "__main__":
     sys.exit(not unittest.main(exit=False, verbosity=2).result.wasSuccessful())

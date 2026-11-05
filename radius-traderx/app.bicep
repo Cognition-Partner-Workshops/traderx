@@ -61,7 +61,7 @@ resource peopleservice 'Applications.Core/containers@2023-10-01-preview' = {
   name: 'people-service'
   properties: {
     application: application
-    runtimes: hardenedRuntime('people-service', [])
+    runtimes: hardenedRuntime('people-service', ['/app/Logs'])
     container: {
       image: 'ghcr.io/finos/traderx/people-service:latest'
       ports: {
