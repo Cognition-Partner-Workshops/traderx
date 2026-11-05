@@ -1,20 +1,13 @@
-# [Choice] Node.js version (use -bullseye variants on local arm64/Apple Silicon): 18, 16, 14, 18-bullseye, 16-bullseye, 14-bullseye, 18-buster, 16-buster, 14-buster
-ARG VARIANT=16-bullseye
-FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT}
-
+FROM node:22-bookworm-slim AS build
 WORKDIR /reference-data
 COPY . .
+RUN npm install --legacy-peer-deps && npm run build && npm prune --omit=dev --legacy-peer-deps
+
+FROM node:22-bookworm-slim
+WORKDIR /reference-data
+COPY --from=build --chown=node:node /reference-data/dist ./dist
+COPY --from=build --chown=node:node /reference-data/node_modules ./node_modules
+COPY --chown=node:node data ./data
 EXPOSE 18085
-
-# [Optional] Uncomment this section to install additional OS packages.
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-#     && apt-get -y install --no-install-recommends <your-package-list-here>
-
-# [Optional] Uncomment if you want to install an additional version of node using nvm
-ARG EXTRA_NODE_VERSION=18
-RUN su node -c "source /usr/local/share/nvm/nvm.sh && nvm install ${EXTRA_NODE_VERSION}"
-
-# [Optional] Uncomment if you want to install more global node modules
-# RUN su node -c "npm install -g <your-package-list-here>"
-RUN npm install
-ENTRYPOINT npm run start
+USER node
+ENTRYPOINT ["node","dist/main"]

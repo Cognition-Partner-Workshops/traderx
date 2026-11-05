@@ -3,6 +3,8 @@ version: '3.4'
 services:
   database:
     restart: always
+    security_opt: [no-new-privileges:true]
+    read_only: true
     environment:
       - DATABASE_WEB_HOSTNAMES=${TRADERX_FQDN:-localhost}
     image: database
@@ -19,13 +21,18 @@ services:
       - 18083:18083
       - 18084:18084
     volumes:
-      # Mount the root folder that contains .git
-      - .:/workspace:cached
-    command: ./run.sh
+      - type: tmpfs
+        target: /tmp
+      - type: tmpfs
+        target: /database/_data
+        tmpfs:
+          mode: 01777
     networks:
       - localnet
   reference-data:
     restart: always
+    security_opt: [no-new-privileges:true]
+    read_only: true
     image: reference-data
     build:
       context: reference-data
@@ -36,9 +43,8 @@ services:
     ports:
       - 18085:18085
     volumes:
-      # Mount the root folder that contains .git
-      - .:/workspace:cached
-    command: npm run start
+      - type: tmpfs
+        target: /tmp
     networks:
       - localnet
   trade-feed:
@@ -48,18 +54,21 @@ services:
       context: trade-feed
       dockerfile: Dockerfile
     working_dir: /trade-feed
+    security_opt: [no-new-privileges:true]
+    read_only: true
     expose:
       - 18086
     ports:
       - 18086:18086
     volumes:
-      # Mount the root folder that contains .git
-      - .:/workspace:cached
-    command: npm run start
+      - type: tmpfs
+        target: /tmp
     networks:
       - localnet
   people-service:
     restart: always
+    security_opt: [no-new-privileges:true]
+    read_only: true
     image: people-service
     build:
       context: people-service
@@ -70,13 +79,18 @@ services:
     ports:
       - 18089:18089
     volumes:
-      # Mount the root folder that contains .git
-      - .:/workspace:cached
-    command: /PeopleService.WebApi dotnet run
+      - type: tmpfs
+        target: /tmp
+      - type: tmpfs
+        target: /people-service/Logs
+        tmpfs:
+          mode: 01777
     networks:
       - localnet
   account-service:
     restart: always
+    security_opt: [no-new-privileges:true]
+    read_only: true
     image: account-service
     build:
       context: account-service
@@ -90,9 +104,8 @@ services:
       - DATABASE_TCP_HOST=database
       - PEOPLE_SERVICE_HOST=people-service
     volumes:
-      # Mount the root folder that contains .git
-      - .:/workspace:cached
-    command: ./gradlew bootRun
+      - type: tmpfs
+        target: /tmp
     networks:
       - localnet
     depends_on:
@@ -100,6 +113,8 @@ services:
       - people-service
   position-service:
     restart: always
+    security_opt: [no-new-privileges:true]
+    read_only: true
     image: position-service
     build:
       context: position-service
@@ -112,15 +127,16 @@ services:
     environment:
       - DATABASE_TCP_HOST=database
     volumes:
-      # Mount the root folder that contains .git
-      - .:/workspace:cached
-    command: ./gradlew bootRun
+      - type: tmpfs
+        target: /tmp
     networks:
       - localnet
     depends_on:
       - database
   trade-service:
     restart: always
+    security_opt: [no-new-privileges:true]
+    read_only: true
     image: trade-service
     build:
       context: trade-service
@@ -137,9 +153,8 @@ services:
       - REFERENCE_DATA_HOST=reference-data
       - TRADE_FEED_HOST=trade-feed
     volumes:
-      # Mount the root folder that contains .git
-      - .:/workspace:cached
-    command: ./gradlew bootRun
+      - type: tmpfs
+        target: /tmp
     networks:
       - localnet
     depends_on:
@@ -150,6 +165,8 @@ services:
       - trade-feed
   trade-processor:
     restart: always
+    security_opt: [no-new-privileges:true]
+    read_only: true
     image: trade-processor
     build:
       context: trade-processor
@@ -163,9 +180,8 @@ services:
       - DATABASE_TCP_HOST=database
       - TRADE_FEED_HOST=trade-feed
     volumes:
-      # Mount the root folder that contains .git
-      - .:/workspace:cached
-    command: ./gradlew bootRun
+      - type: tmpfs
+        target: /tmp
     networks:
       - localnet
     depends_on:
@@ -173,6 +189,8 @@ services:
       - trade-feed
   web-front-end-angular:
     restart: always
+    security_opt: [no-new-privileges:true]
+    read_only: true
     image: web-front-end-angular
     build:
       context: web-front-end/angular
@@ -183,15 +201,23 @@ services:
     ports:
       - 18093:18093
     volumes:
-      # Mount the root folder that contains .git
-      - .:/workspace:cached
-    command: npm run start
+      - type: tmpfs
+        target: /tmp
+      - type: tmpfs
+        target: /web-front-end/angular/.angular
+        tmpfs:
+          mode: 01777
     networks:
       - localnet
     depends_on:
       - database
       - trade-feed
   ingress:
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    volumes:
+      - type: tmpfs
+        target: /tmp
     image: ingress
     build:
       context: ingress

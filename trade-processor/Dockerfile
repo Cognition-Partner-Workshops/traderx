@@ -1,20 +1,13 @@
-# See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/java/.devcontainer/base.Dockerfile
-
-# [Choice] Java version (use -bullseye variants on local arm64/Apple Silicon): 11, 17, 11-bullseye, 17-bullseye, 11-buster, 17-buster
-ARG VARIANT="21"
-FROM mcr.microsoft.com/vscode/devcontainers/java:1-${VARIANT}
-
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /trade-processor
 COPY . .
+RUN --mount=type=secret,id=gradle_init,target=/root/.gradle/init.d/mirror.gradle,required=false ./gradlew --no-daemon bootJar \
+    && find build/libs -name '*.jar' ! -name '*-plain.jar' -exec cp {} app.jar \;
 
-# [Optional] Uncomment this section to install additional OS packages.
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-#     && apt-get -y install --no-install-recommends <your-package-list-here>
-
-# [Optional] Uncomment this line to install global node packages.
-# RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g <your-package-here>" 2>&1
-
+FROM eclipse-temurin:21-jre
+WORKDIR /trade-processor
+RUN groupadd --gid 10001 app && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin app
+COPY --from=build --chown=10001:10001 /trade-processor/app.jar ./app.jar
 EXPOSE 18091
-
-RUN ./gradlew build
-ENTRYPOINT ./gradlew bootRun
+USER 10001
+ENTRYPOINT ["java","-jar","/trade-processor/app.jar"]

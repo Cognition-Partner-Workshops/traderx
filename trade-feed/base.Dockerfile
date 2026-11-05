@@ -1,5 +1,5 @@
 # [Choice] Node.js version (use -bullseye variants on local arm64/Apple Silicon): 18-bullseye, 16-bullseye, 14-bullseye, 18-buster, 16-buster, 14-buster
-ARG VARIANT=20-bullseye
+ARG VARIANT=22-bookworm
 FROM node:${VARIANT}
 
 # [Option] Install zsh
@@ -33,7 +33,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && chown ${USERNAME}:npm ${NPM_GLOBAL} /usr/local/etc/npmrc \
     && chmod g+s ${NPM_GLOBAL} \
     && npm config -g set prefix ${NPM_GLOBAL} \
-    && sudo -u ${USERNAME} npm config -g set prefix ${NPM_GLOBAL} \
+    && su ${USERNAME} -c "npm config -g set prefix ${NPM_GLOBAL}" \
     # Install eslint
     && su ${USERNAME} -c "umask 0002 && npm install -g eslint" \
     && npm cache clean --force > /dev/null 2>&1 \
@@ -53,3 +53,4 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 
 # [Optional] Uncomment if you want to install more global node modules
 # RUN su node -c "npm install -g <your-package-list-here>""
+USER ${USERNAME}
