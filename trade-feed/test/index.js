@@ -1,0 +1,1 @@
+require('./publish-auth.test');

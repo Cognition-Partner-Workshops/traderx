@@ -43,6 +43,8 @@ services:
       - localnet
   trade-feed:
     restart: always
+    environment:
+      - TRADE_FEED_PUBLISH_TOKEN=${TRADE_FEED_PUBLISH_TOKEN}
     image: trade-feed
     build:
       context: trade-feed
@@ -136,6 +138,7 @@ services:
       - ACCOUNT_SERVICE_HOST=account-service
       - REFERENCE_DATA_HOST=reference-data
       - TRADE_FEED_HOST=trade-feed
+      - TRADE_FEED_PUBLISH_TOKEN=${TRADE_FEED_PUBLISH_TOKEN}
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
@@ -162,6 +165,7 @@ services:
     environment:
       - DATABASE_TCP_HOST=database
       - TRADE_FEED_HOST=trade-feed
+      - TRADE_FEED_PUBLISH_TOKEN=${TRADE_FEED_PUBLISH_TOKEN}
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached

@@ -14,6 +14,11 @@ NOTE: This also broadcasts to the '*' topic to allow a global inspector ui to se
 
 ## Developing Locally
 
+Set `TRADE_FEED_PUBLISH_TOKEN` to a shared secret on the feed and its publishers.
+Publishers must connect with Socket.IO `auth: { token: <shared secret> }`.
+If the variable is unset or empty, all publishes are rejected with a warning.
+Anonymous connections can still subscribe. Never commit the token.
+
 Spin up a local environment to see your changes live (optional, but encouraged)
 
 ```shell

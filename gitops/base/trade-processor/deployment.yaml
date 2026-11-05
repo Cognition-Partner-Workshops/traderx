@@ -21,6 +21,12 @@ spec:
         ports:
         - containerPort: 18091
         env:
+        - name: TRADE_FEED_PUBLISH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: trade-feed-publish-token
+              key: token
+              optional: true
         - name: DATABASE_TCP_HOST
           value: database
         - name: TRADE_FEED_HOST
