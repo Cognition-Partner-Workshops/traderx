@@ -25,6 +25,8 @@ services:
         target: /tmp
       - type: tmpfs
         target: /database/_data
+        tmpfs:
+          mode: 01777
     networks:
       - localnet
   reference-data:
@@ -81,6 +83,8 @@ services:
         target: /tmp
       - type: tmpfs
         target: /people-service/Logs
+        tmpfs:
+          mode: 01777
     networks:
       - localnet
   account-service:
@@ -201,6 +205,8 @@ services:
         target: /tmp
       - type: tmpfs
         target: /web-front-end/angular/.angular
+        tmpfs:
+          mode: 01777
     networks:
       - localnet
     depends_on:
