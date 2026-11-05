@@ -6,6 +6,8 @@ import finos.traderx.accountservice.exceptions.ResourceNotFoundException;
 import finos.traderx.accountservice.model.Account;
 import finos.traderx.accountservice.service.AccountService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value="/account", produces="application/json")
 public class AccountController {
+
+	private static final Logger logger = LoggerFactory.getLogger(AccountController.class);
 
 	@Autowired
 	AccountService accountService;
@@ -57,6 +61,7 @@ public class AccountController {
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<String> generalError(Exception e) {
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		logger.error("Unexpected error processing account request", e);
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
 	}
 }

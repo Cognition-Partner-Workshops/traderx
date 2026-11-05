@@ -93,6 +93,7 @@ public class AccountUserController {
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<String> generalError(Exception e) {
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		logger.error("Unexpected error processing account user request", e);
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
 	}
 }
