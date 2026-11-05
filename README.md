@@ -198,6 +198,28 @@ tilt up
 A great way to interact with the TraderX community is to attend the bi-weekly Friday TraderX meetings.
 Email help@finos.org to be added to the meeting invite directly, or find the meeting in the [FINOS Community Calendar](https://calendar.finos.org/).
 
+## Client record references
+
+Account-routing references are random UUIDs persisted in the Accounts table;
+they are not hashes of account numbers. New trade IDs are also random UUIDs.
+Legacy trade/order IDs of the form `TRADE-<account>-<suffix>` are instead
+serialized as HMAC-SHA256 references so predictable legacy suffixes cannot be
+used for an offline account-number dictionary.
+
+Before serving legacy records, provision `TRADERX_REFERENCE_SECRET` in the
+server environment of trade-service, trade-processor, and any other JVM emitting
+legacy IDs. Generate a cryptographically random value once, for example with
+`openssl rand -hex 32`, and retain it in the deployment's protected secret store.
+Use the same persisted value across those services, replicas and restarts.
+Never commit the value or expose it to browsers or logs. The server-side JVM
+property `traderx.reference.secret` is also supported and takes precedence.
+Legacy-ID serialization fails closed if the configured value is missing or
+shorter than 32 characters; there is no unkeyed fallback. Rotating the secret
+changes legacy public IDs, so clients should reload their trade lists after
+rotation or upgrade. Random trade IDs and account-routing references are
+unchanged and do not require this secret. Routing references do not replace
+authorization.
+
 ## Contributing
 
 1. Fork it (<https://github.com/finos/traderx/fork>)

@@ -2,7 +2,9 @@ package finos.traderx.records;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
+import java.security.GeneralSecurityException;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.sql.DataSource;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -63,7 +65,24 @@ public final class AccountReferences {
         @Override
         public void serialize(String value, JsonGenerator output, SerializerProvider provider) throws IOException {
             output.writeString(value.matches("TRADE-[0-9]+-.*")
-                    ? UUID.nameUUIDFromBytes(value.getBytes(StandardCharsets.UTF_8)).toString() : value);
+                    ? legacyTradeReference(value) : value);
+        }
+    }
+
+    private static String legacyTradeReference(String value) {
+        String secret = System.getProperty("traderx.reference.secret", System.getenv("TRADERX_REFERENCE_SECRET"));
+        if (secret == null || secret.length() < 32) {
+            throw new IllegalStateException("TRADERX_REFERENCE_SECRET must contain at least 32 characters");
+        }
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            byte[] digest = mac.doFinal(value.getBytes(StandardCharsets.UTF_8));
+            StringBuilder reference = new StringBuilder();
+            for (byte part : digest) reference.append(String.format("%02x", part & 0xff));
+            return reference.toString();
+        } catch (GeneralSecurityException exception) {
+            throw new IllegalStateException("Legacy trade reference generation unavailable", exception);
         }
     }
 }
