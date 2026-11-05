@@ -1,10 +1,19 @@
 package finos.traderx.accountservice.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.UUID;
+import finos.traderx.accountservice.exceptions.ResourceNotFoundException;
+import finos.traderx.accountservice.model.AccountUser;
+import finos.traderx.accountservice.repository.AccountRepository;
+import finos.traderx.accountservice.service.AccountUserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -48,7 +57,22 @@ class ErrorDisclosureTest {
     void D1_notFoundDoesNotEchoAnArbitraryExceptionMessage() {
         var error = new finos.traderx.accountservice.exceptions.ResourceNotFoundException("SQL internal-host");
         assertThat(new AccountController().resourceNotFoundExceptionMapper(error).getBody()).isEqualTo("Account not found.");
-        assertThat(new AccountUserController().resourceNotFoundExceptionMapper(error).getBody()).isEqualTo("Account user or person not found.");
+        assertThat(new AccountUserController().resourceNotFoundExceptionMapper(error).getBody()).isEqualTo("Account, account user or person not found.");
     }
 
+    @Test
+    void D1_missingAccountIsCoveredBySafeAccountUserNotFoundMessage() {
+        var repository = mock(AccountRepository.class);
+        when(repository.findById(123)).thenReturn(Optional.empty());
+        var service = new AccountUserService();
+        ReflectionTestUtils.setField(service, "accountRepository", repository);
+        var accountUser = new AccountUser();
+        accountUser.setAccountId(123);
+
+        var error = assertThrows(ResourceNotFoundException.class, () -> service.upsertAccountUser(accountUser));
+        var response = new AccountUserController().resourceNotFoundExceptionMapper(error);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(404);
+        assertThat(response.getBody()).isEqualTo("Account, account user or person not found.").doesNotContain("123");
+    }
 }

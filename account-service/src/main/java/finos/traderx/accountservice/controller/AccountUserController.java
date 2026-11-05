@@ -89,7 +89,7 @@ public class AccountUserController {
 
 	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<String> resourceNotFoundExceptionMapper(ResourceNotFoundException e) {
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account user or person not found.");
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account, account user or person not found.");
 	}
 
 	@ExceptionHandler(Exception.class)
