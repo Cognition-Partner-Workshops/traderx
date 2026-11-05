@@ -47,13 +47,13 @@ services:
       - localnet
   trade-feed:
     restart: always
-    security_opt: [no-new-privileges:true]
-    read_only: true
     image: trade-feed
     build:
       context: trade-feed
       dockerfile: Dockerfile
     working_dir: /trade-feed
+    security_opt: [no-new-privileges:true]
+    read_only: true
     expose:
       - 18086
     ports:
