@@ -66,11 +66,10 @@ function canSubscribe(socket, topic) {
   if (CLIENT_TOPIC_PATTERN.test(topic)) {
     return true;
   }
-  return INTERNAL_TOPICS.includes(topic) && socket.data.internalSubscriber === true;
+  return INTERNAL_TOPICS.includes(topic) && isInternalService(socket);
 }
 
 io.on('connection', (socket) => {
-  socket.data.internalSubscriber = isInternalService(socket);
   log.info(`New Connection from ${socket.id}`);
   socket.on(SUBSCRIBE, (topic) => {
     if (!canSubscribe(socket, topic)) {
