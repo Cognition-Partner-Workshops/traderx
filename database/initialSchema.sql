@@ -1,3 +1,5 @@
+Drop Table TradeAudit IF EXISTS;
+
 Drop Table Trades IF EXISTS;
 
 Drop Table AccountUsers IF EXISTS; 
@@ -23,6 +25,10 @@ CREATE TABLE Trades ( ID Varchar (50) Primary Key, AccountID INTEGER, Created TI
 Alter Table Trades Add Foreign Key (AccountID) references Accounts(ID); 
 
 CREATE SEQUENCE ACCOUNTS_SEQ start with 65000 INCREMENT BY 1;
+
+CREATE TABLE TradeAudit ( ID VARCHAR(50) PRIMARY KEY, TradeID VARCHAR(50) NOT NULL, Actor VARCHAR(100) NOT NULL, Action VARCHAR(50) NOT NULL, AccountID INTEGER NOT NULL, Security VARCHAR(15) NOT NULL, Side VARCHAR(10) NOT NULL, Quantity INTEGER NOT NULL, CreatedUTC TIMESTAMP WITH TIME ZONE NOT NULL );
+
+ALTER TABLE TradeAudit ADD FOREIGN KEY (AccountID) REFERENCES Accounts(ID);
 
 --- SAMPLE DATA ---
 

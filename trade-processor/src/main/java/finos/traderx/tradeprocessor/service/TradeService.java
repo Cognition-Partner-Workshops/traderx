@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import finos.traderx.messaging.PubSubException;
@@ -18,12 +19,16 @@ import finos.traderx.tradeprocessor.repository.*;
 
 @Service
 public class TradeService {
+	private static final String AUDIT_ACTOR = "trade-processor";
 	Logger log= LoggerFactory.getLogger(TradeService.class);
 	@Autowired
 	TradeRepository tradeRepository;
 
 	@Autowired
 	PositionRepository positionRepository;
+
+	@Autowired
+	TradeAuditRepository tradeAuditRepository;
 
 	
     @Autowired 
@@ -32,6 +37,7 @@ public class TradeService {
     @Autowired
     private Publisher<Position> positionPublisher;
     
+	@Transactional
 	public TradeBookingResult processTrade(TradeOrder order) {
 		log.info("Trade order received : "+order);
         Trade t=new Trade();
@@ -60,6 +66,7 @@ public class TradeService {
 		position.setQuantity(position.getQuantity()+newQuantity);
 		log.info("Trade {}",t);
 		tradeRepository.save(t);
+		tradeAuditRepository.save(new TradeAudit(t, AUDIT_ACTOR));
 		positionRepository.save(position);
 		// Simulate the handling of this trade...
 		// Now mark as processing
