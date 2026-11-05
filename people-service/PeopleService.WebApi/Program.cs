@@ -33,13 +33,18 @@ builder.Host.UseSerilog((hostContext, services, configuration) =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Swagger is opt-in (Swagger__Enabled=true): the container runs with ASPNETCORE_ENVIRONMENT=Development via launchSettings.
+if (app.Configuration.GetValue<bool>("Swagger:Enabled"))
 {
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "PeopleService.WebApi v1"));
 }
 
-app.UseHttpsRedirection();
+// Served over plain HTTP behind the ingress; enable (HttpsRedirection__Enabled=true) only when Kestrel/ingress serves HTTPS.
+if (app.Configuration.GetValue<bool>("HttpsRedirection:Enabled"))
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthorization();
 

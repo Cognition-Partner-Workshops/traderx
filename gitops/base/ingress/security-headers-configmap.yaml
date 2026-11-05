@@ -1,0 +1,15 @@
+# Response headers added by ingress-nginx to every response of traderx-ingress
+# (via the nginx.ingress.kubernetes.io/custom-headers annotation). Keep in sync with
+# ingress/nginx.traderx.conf.template. On ingress-nginx >= 1.12 these header names must
+# also be listed in the controller ConfigMap key `global-allowed-response-headers`.
+# The controller's `server-tokens` ConfigMap key defaults to "false" (no version leak).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traderx-security-headers
+data:
+  X-Content-Type-Options: "nosniff"
+  X-Frame-Options: "DENY"
+  Referrer-Policy: "strict-origin-when-cross-origin"
+  Permissions-Policy: "camera=(), microphone=(), geolocation=()"
+  Content-Security-Policy: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' http: https: ws: wss:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"

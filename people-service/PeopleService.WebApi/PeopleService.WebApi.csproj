@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="PeopleService.WebApi.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\PeopleService.Core\PeopleService.Core.csproj" />
   </ItemGroup>
 

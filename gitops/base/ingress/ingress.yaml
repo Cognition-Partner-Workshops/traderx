@@ -4,6 +4,7 @@ metadata:
   name: traderx-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/custom-headers: traderx/traderx-security-headers
 spec:
   ingressClassName: nginx
   rules:
