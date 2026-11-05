@@ -1,6 +1,9 @@
 package finos.traderx.tradeprocessor.service;
 
 import java.util.ArrayList;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.validation.annotation.Validated;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +20,7 @@ import finos.traderx.tradeprocessor.model.*;
 import finos.traderx.tradeprocessor.repository.*;
 
 @Service
+@Validated
 public class TradeService {
 	Logger log= LoggerFactory.getLogger(TradeService.class);
 	@Autowired
@@ -32,7 +36,7 @@ public class TradeService {
     @Autowired
     private Publisher<Position> positionPublisher;
     
-	public TradeBookingResult processTrade(TradeOrder order) {
+	public TradeBookingResult processTrade(@NotNull @Valid TradeOrder order) {
 		log.info("Trade order received : "+order);
         Trade t=new Trade();
         t.setAccountId(order.getAccountId());

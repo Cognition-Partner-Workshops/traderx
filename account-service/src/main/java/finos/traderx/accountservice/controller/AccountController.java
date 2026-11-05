@@ -1,6 +1,9 @@
 package finos.traderx.accountservice.controller;
 
 import java.util.List;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import finos.traderx.accountservice.exceptions.ResourceNotFoundException;
 import finos.traderx.accountservice.model.Account;
@@ -35,13 +38,13 @@ public class AccountController {
 	}
 
 	@PostMapping("/")
-	public ResponseEntity<Account> createAccount(@RequestBody Account account) {
-		return ResponseEntity.ok(this.accountService.upsertAccount(account));
+	public ResponseEntity<Account> createAccount(@Valid @RequestBody Account account) {
+		return ResponseEntity.ok(this.accountService.createAccount(account));
 	}
 
 	@PutMapping("/")
-	public ResponseEntity<Account> updateAccount(@RequestBody Account account) {
-		return ResponseEntity.ok(this.accountService.upsertAccount(account));
+	public ResponseEntity<Account> updateAccount(@Valid @RequestBody Account account) {
+		return ResponseEntity.ok(this.accountService.updateAccount(account));
 	}
 
 	@GetMapping("/")
@@ -58,5 +61,10 @@ public class AccountController {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<String> generalError(Exception e) {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+	}
+
+	@ExceptionHandler({MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
+	public ResponseEntity<String> invalidRequest(Exception e) {
+		return ResponseEntity.badRequest().body("Invalid request");
 	}
 }

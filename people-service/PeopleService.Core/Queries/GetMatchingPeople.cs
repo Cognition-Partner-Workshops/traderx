@@ -1,6 +1,5 @@
 ﻿using CacheManager.Core;
 using FluentValidation;
-using FluentValidation.Results;
 using JetBrains.Annotations;
 using MediatR;
 using PeopleService.Core.DirectoryService;
@@ -31,31 +30,15 @@ namespace PeopleService.Core.Queries
         [UsedImplicitly]
         public class RequestValidator : AbstractValidator<Request>
         {
-            public override ValidationResult Validate(ValidationContext<Request> context)
+            public RequestValidator()
             {
-                if (string.IsNullOrWhiteSpace(context.InstanceToValidate.SearchText))
-                {
-                    return new ValidationResult(
-                        new[]
-                        {
-                            new ValidationFailure(
-                                "",
-                                $"{nameof(Request.SearchText)} must be provided")
-                        });
-                }
+                RuleFor(request => request.SearchText)
+                    .Cascade(CascadeMode.Stop)
+                    .NotEmpty().WithMessage($"{nameof(Request.SearchText)} must be provided")
+                    .MinimumLength(3).WithMessage($"{nameof(Request.SearchText)} must be at least 3 characters long");
 
-                if (context.InstanceToValidate.SearchText.Length < 3)
-                {
-                    return new ValidationResult(
-                        new[]
-                        {
-                            new ValidationFailure(
-                                "",
-                                $"{nameof(Request.SearchText)} must be at least 3 characters long")
-                        });
-                }
-
-                return new ValidationResult();
+                RuleFor(request => request.Take)
+                    .InclusiveBetween(1, 100).WithMessage("Take must be between 1 and 100");
             }
         }
 

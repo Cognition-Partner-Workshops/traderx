@@ -1,12 +1,23 @@
 package finos.traderx.tradeservice.model;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+
 public class TradeOrder {
 
     public String id;
     private String state;
+    @NotNull
+    @Pattern(regexp = "^(?!.*\\.\\.)[A-Za-z0-9][A-Za-z0-9.-]{0,11}$")
     private String security;
+    @NotNull
+    @Positive
     private Integer quantity;
+    @NotNull
+    @Positive
     private Integer accountId;
+    @NotNull
     private TradeSide side;
 
     public TradeOrder(){}

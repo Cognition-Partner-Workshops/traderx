@@ -1,6 +1,9 @@
 package finos.traderx.tradeservice.controller;
 
 import org.slf4j.Logger;
+import java.net.URI;
+import jakarta.validation.Valid;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +45,7 @@ public class TradeOrderController {
 
 	@Operation(description = "Submit a new trade order")
 	@PostMapping("/")
-	public ResponseEntity<TradeOrder> createTradeOrder(@Parameter(description = "the intendeded trade order") @RequestBody TradeOrder tradeOrder) {
+	public ResponseEntity<TradeOrder> createTradeOrder(@Parameter(description = "the intendeded trade order") @Valid @RequestBody TradeOrder tradeOrder) {
 		log.info("Called createTradeOrder");
 		
 		if (!validateTicker(tradeOrder.getSecurity())) 
@@ -69,7 +72,8 @@ public class TradeOrderController {
 	{
 		// Move whole method to a sperate class that handles all reference data 
 		// so we can mock it and run without this service up.
-		String url = this.referenceDataServiceAddress + "//stocks/" + ticker;
+		URI url = UriComponentsBuilder.fromHttpUrl(this.referenceDataServiceAddress)
+				.path("/stocks/{ticker}").encode().buildAndExpand(ticker).toUri();
 		ResponseEntity<Security> response = null;
 
 		try {
@@ -93,7 +97,8 @@ public class TradeOrderController {
 		// Move whole method to a sperate class that handles all accounts 
 		// so we can mock it and run without this service up.
 
-		String url = this.accountServiceAddress + "//account/" + id;
+		URI url = UriComponentsBuilder.fromHttpUrl(this.accountServiceAddress)
+				.path("/account/{id}").encode().buildAndExpand(id).toUri();
 		ResponseEntity<Account> response = null;
 
 		try 

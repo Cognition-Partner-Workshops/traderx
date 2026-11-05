@@ -1,6 +1,12 @@
 package finos.traderx.accountservice.controller;
 
 import java.util.List;
+import java.net.URI;
+import org.springframework.web.util.UriComponentsBuilder;
+import finos.traderx.accountservice.exceptions.AccountUserConflictException;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import finos.traderx.accountservice.exceptions.ResourceNotFoundException;
 import finos.traderx.accountservice.model.AccountUser;
@@ -47,9 +53,9 @@ public class AccountUserController {
 	}
 
 	@PostMapping("/")
-	public ResponseEntity<AccountUser> createAccountUser(@RequestBody AccountUser accountUser) {
+	public ResponseEntity<AccountUser> createAccountUser(@Valid @RequestBody AccountUser accountUser) {
 		if (validatePerson(accountUser.getUsername())) {
-			return ResponseEntity.ok(this.accountUserService.upsertAccountUser(accountUser));
+			return ResponseEntity.ok(this.accountUserService.createAccountUser(accountUser));
 		}
 		else {
 			throw new ResourceNotFoundException(accountUser.getUsername() + " not found in People service.");
@@ -57,8 +63,11 @@ public class AccountUserController {
 	}
 
 	@PutMapping("/")
-	public ResponseEntity<AccountUser> updateAccountUser(@RequestBody AccountUser accountUser) {
-		return ResponseEntity.ok(this.accountUserService.upsertAccountUser(accountUser));
+	public ResponseEntity<AccountUser> updateAccountUser(@Valid @RequestBody AccountUser accountUser) {
+		if (!validatePerson(accountUser.getUsername())) {
+			throw new ResourceNotFoundException("Person not found in People service.");
+		}
+		return ResponseEntity.ok(this.accountUserService.updateAccountUser(accountUser));
 	}
 
 	@GetMapping("/")
@@ -67,7 +76,9 @@ public class AccountUserController {
 	}
 
 	private boolean validatePerson(String username) {
-		String url = this.peopleServiceAddress + "/People/GetPerson" + "?LogonId=" + username;
+		URI url = UriComponentsBuilder.fromHttpUrl(this.peopleServiceAddress)
+				.path("/People/GetPerson").queryParam("LogonId", "{logonId}")
+				.encode().buildAndExpand(username).toUri();
 		ResponseEntity<Person> response = null;
 
 		try {
@@ -94,5 +105,15 @@ public class AccountUserController {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<String> generalError(Exception e) {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+	}
+
+	@ExceptionHandler({MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
+	public ResponseEntity<String> invalidRequest(Exception e) {
+		return ResponseEntity.badRequest().body("Invalid request");
+	}
+
+	@ExceptionHandler(AccountUserConflictException.class)
+	public ResponseEntity<String> duplicateMapping(AccountUserConflictException e) {
+		return ResponseEntity.status(HttpStatus.CONFLICT).body("Account user already exists");
 	}
 }
