@@ -47,6 +47,7 @@
             proxy_pass http://account-service:18088/;
         }
         location /position-service/ {
+            proxy_set_header X-Authenticated-User "";
             proxy_pass http://position-service:18090/;
         }
         location /trade-service/ {

@@ -8,6 +8,8 @@ servers:
     description: Empty URL to help proxied documentation work
 paths:
   /trades/{accountId}:
+    parameters:
+      - $ref: '#/components/parameters/AuthenticatedUser'
     get:
       tags:
         - trade-controller
@@ -29,6 +31,8 @@ paths:
                 items:
                   $ref: '#/components/schemas/Trade'
   /trades/:
+    parameters:
+      - $ref: '#/components/parameters/AuthenticatedUser'
     get:
       tags:
         - trade-controller
@@ -43,6 +47,8 @@ paths:
                 items:
                   $ref: '#/components/schemas/Trade'
   /positions/{accountId}:
+    parameters:
+      - $ref: '#/components/parameters/AuthenticatedUser'
     get:
       tags:
         - position-controller
@@ -64,6 +70,8 @@ paths:
                 items:
                   $ref: '#/components/schemas/Position'
   /positions/:
+    parameters:
+      - $ref: '#/components/parameters/AuthenticatedUser'
     get:
       tags:
         - position-controller
@@ -78,6 +86,15 @@ paths:
                 items:
                   $ref: '#/components/schemas/Position'
 components:
+  parameters:
+    AuthenticatedUser:
+      name: X-Authenticated-User
+      in: header
+      required: true
+      description: Trusted proxy-supplied username. Missing/blank returns 401; non-owned account returns 403. Collections include only owned accounts.
+      schema:
+        type: string
+        minLength: 1
   schemas:
     Trade:
       type: object

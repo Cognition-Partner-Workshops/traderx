@@ -13,6 +13,19 @@ Login details are `$DATABASE_DBUSER` and `$DATABASE_DBPASS`
 
 Default `$POSITION_SERVICE_PORT` is `18090`
 
+All GET endpoints under `/positions/` and `/trades/` require the
+`X-Authenticated-User` header. Missing or blank identity returns 401.
+Account-specific requests return 403 unless the username has an entry for that
+account in the shared database's `AccountUsers(AccountID, Username)` mapping.
+Collection requests return only records belonging to the caller's accounts.
+The bundled Docker Compose/Radius nginx ingress strips this header but does not
+authenticate users, so requests through it return 401 until a real identity-aware
+proxy is configured to set the header from verified identity. The Kubernetes
+gitops Ingress does not strip this header; an identity-aware proxy must strip any
+client-supplied value and set it from verified identity there. Do not expose this
+service directly to untrusted clients; the Docker Compose development port
+remains published and bypasses ingress protection.
+
 In this project, you can run the database by running a shell in the [database](../database/README.md) project and running
 
 ```bash
@@ -64,7 +77,7 @@ prism --cors --port 18090 mock openapi.yaml
 You can then try out your requests against the mock service as follows: (or from a browser)
 
 ```bash
-curl -X GET "http://localhost:18090/trades/22214" -H "accept: application/json"
-curl -X GET "http://localhost:18090/positions/22214" -H "accept: application/json"
+curl -X GET "http://localhost:18090/trades/22214" -H "accept: application/json" -H "X-Authenticated-User: user01"
+curl -X GET "http://localhost:18090/positions/22214" -H "accept: application/json" -H "X-Authenticated-User: user01"
 
 ```
