@@ -13,6 +13,14 @@ Login details are `$DATABASE_DBUSER` and `$DATABASE_DBPASS`
 
 Default `$POSITION_SERVICE_PORT` is `18090`
 
+All GET endpoints under `/positions/` and `/trades/` require the
+`X-Authenticated-User` header. Missing or blank identity returns 401.
+Account-specific requests return 403 unless the username has an entry for that
+account in the shared database's `AccountUsers(AccountID, Username)` mapping.
+Collection requests return only records belonging to the caller's accounts.
+The header must be supplied by a trusted authentication proxy that strips any
+client-supplied value; do not expose this service directly to untrusted clients.
+
 In this project, you can run the database by running a shell in the [database](../database/README.md) project and running
 
 ```bash
@@ -64,7 +72,7 @@ prism --cors --port 18090 mock openapi.yaml
 You can then try out your requests against the mock service as follows: (or from a browser)
 
 ```bash
-curl -X GET "http://localhost:18090/trades/22214" -H "accept: application/json"
-curl -X GET "http://localhost:18090/positions/22214" -H "accept: application/json"
+curl -X GET "http://localhost:18090/trades/22214" -H "accept: application/json" -H "X-Authenticated-User: user01"
+curl -X GET "http://localhost:18090/positions/22214" -H "accept: application/json" -H "X-Authenticated-User: user01"
 
 ```
