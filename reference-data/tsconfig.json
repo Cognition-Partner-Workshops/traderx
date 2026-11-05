@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "rootDir": ".",
+    "types": ["node", "jest"],
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2022", // Updated to "es2022" for Node 20
+    "target": "es2022",
+    "ignoreDeprecations": "6.0",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",

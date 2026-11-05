@@ -1,9 +1,8 @@
 # compiled output
 /dist
 /node_modules
-
-# Suppressing package-lock so that corporate envs can build locally without leaking local repos
-package-lock.json
+*.tsbuildinfo
+!package-lock.json
 
 # Logs
 logs
