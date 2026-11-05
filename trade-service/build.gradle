@@ -7,15 +7,17 @@
 
 plugins {
   id 'java'
-  id 'org.springframework.boot' version '3.3.13'
-  id 'io.spring.dependency-management' version '1.1.6'
+  id 'org.springframework.boot' version '4.1.2'
+  id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'finos.traderx.trade-service'
 version = '0.0.1-SNAPSHOT'
 
 java{
-	sourceCompatibility = JavaVersion.VERSION_21
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
 }
 
 configurations.all {
@@ -25,16 +27,18 @@ configurations.all {
 dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'com.h2database:h2:2.2.224'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-restclient'
+	implementation 'com.h2database:h2:2.5.252'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0'
 
-	implementation('org.json:json:20240303') {
+	implementation('org.json:json:20260814') {
 		because 'previous versions are affected by multiple CVE'
 	}
-	implementation ('io.socket:socket.io-client:2.1.0') {
+	implementation ('io.socket:socket.io-client:2.1.2') {
 		exclude group: 'org.json', module: 'json'
 	}
+	implementation 'com.squareup.okhttp3:okhttp:5.5.1'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
