@@ -17,15 +17,19 @@ import finos.traderx.messaging.PubSubException;
 import finos.traderx.messaging.Publisher;
 import finos.traderx.tradeservice.exceptions.ResourceNotFoundException;
 import finos.traderx.tradeservice.model.Account;
+import finos.traderx.tradeservice.model.AccountNumberMask;
 import finos.traderx.tradeservice.model.Security;
 import finos.traderx.tradeservice.model.TradeOrder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import finos.traderx.records.AccountReferenceLookup;
 
 @CrossOrigin("*")
 @RestController
 @RequestMapping(value="/trade", produces = "application/json")
 public class TradeOrderController {
+	@Autowired(required = false)
+	private AccountReferenceLookup accountReferences;
 
 	private static final Logger log = LoggerFactory.getLogger(TradeOrderController.class);
 
@@ -51,12 +55,15 @@ public class TradeOrderController {
 		}
 		else if(!validateAccount(tradeOrder.getAccountId()))
 		{
-			throw new ResourceNotFoundException(tradeOrder.getAccountId() + " not found in Account service.");
+			throw new ResourceNotFoundException(AccountNumberMask.mask(tradeOrder.getAccountId()) + " not found in Account service.");
 		}
 		else
 		{
 			try{
 				log.info("Trade is valid. Submitting {}", tradeOrder);
+				if (accountReferences != null) {
+					tradeOrder.setAccountReference(accountReferences.reference(tradeOrder.getAccountId()));
+				}
 				tradePublisher.publish("/trades",tradeOrder);
 				return  ResponseEntity.ok(tradeOrder);
 			}  catch (PubSubException e){

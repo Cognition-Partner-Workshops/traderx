@@ -3,6 +3,9 @@ package finos.traderx.tradeprocessor.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import finos.traderx.records.AccountReferences;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,6 +25,7 @@ public class Trade implements Serializable {
     @Id
 	private String id;
 
+	@JsonSerialize(using = AccountReferences.TradeIdSerializer.class)
 	public String getId() {
 		return this.id;
 	}
@@ -33,6 +37,7 @@ public class Trade implements Serializable {
 	@Column(name = "ACCOUNTID")
 	private Integer accountId;
 
+	@JsonSerialize(using = AccountNumberMask.Serializer.class)
 	public Integer getAccountId() {
 		return this.accountId;
 	}

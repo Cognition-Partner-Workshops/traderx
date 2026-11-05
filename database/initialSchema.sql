@@ -1,3 +1,5 @@
+Drop Table TradeStatusHistory IF EXISTS;
+
 Drop Table Trades IF EXISTS;
 
 Drop Table AccountUsers IF EXISTS; 
@@ -8,7 +10,7 @@ Drop Table Accounts IF EXISTS;
 
 Drop Sequence ACCOUNTS_SEQ IF EXISTS;
 
-CREATE TABLE Accounts ( ID INTEGER PRIMARY KEY, DisplayName VARCHAR (50) ) ; 
+CREATE TABLE Accounts ( ID INTEGER PRIMARY KEY, DisplayName VARCHAR (50), PublicReference VARCHAR(36) DEFAULT RANDOM_UUID() NOT NULL UNIQUE ) ;
 
 CREATE TABLE AccountUsers ( AccountID INTEGER NOT NULL, Username VARCHAR(15) NOT NULL, PRIMARY KEY (AccountID,Username));  
 
@@ -22,9 +24,25 @@ CREATE TABLE Trades ( ID Varchar (50) Primary Key, AccountID INTEGER, Created TI
 
 Alter Table Trades Add Foreign Key (AccountID) references Accounts(ID); 
 
+CREATE TABLE TradeStatusHistory ( ID BIGINT AUTO_INCREMENT PRIMARY KEY, TradeID VARCHAR (100) NOT NULL, State VARCHAR(20) NOT NULL check (State in ('New', 'Processing', 'Settled', 'Cancelled')), ChangedAt TIMESTAMP WITH TIME ZONE NOT NULL ) ; 
+
+Alter Table TradeStatusHistory Add Foreign Key (TradeID) references Trades(ID);
+
+CREATE TRIGGER TradeStatusHistoryImmutable BEFORE UPDATE, DELETE ON TradeStatusHistory FOR EACH ROW AS '
+org.h2.api.Trigger create() {
+    return new org.h2.api.Trigger() {
+        public void fire(java.sql.Connection connection, Object[] before, Object[] after) throws java.sql.SQLException {
+            throw new java.sql.SQLException("Trade status history is append-only");
+        }
+    };
+}
+';
+
 CREATE SEQUENCE ACCOUNTS_SEQ start with 65000 INCREMENT BY 1;
 
 --- SAMPLE DATA ---
+
+SET AUTOCOMMIT FALSE;
 
 INSERT into Accounts (ID, DisplayName) VALUES (22214, 'Test Account 20'); 
 INSERT into Accounts (ID, DisplayName) VALUES (11413, 'Private Clients Fund TTXX'); 
@@ -67,4 +85,9 @@ INSERT into Positions (AccountID, Security, Updated, Quantity) VALUES(22214, 'C'
 
 
 INSERT into Trades(ID, Created, Updated, Security, Side, Quantity, State, AccountID) VALUES('TRADE-52355-AABBCC', NOW(), NOW(), 'BAC', 'Sell', 2400, 'Settled', 52355); 
-INSERT into Positions (AccountID, Security, Updated, Quantity) VALUES(52355, 'BAC',NOW(), -2400); 
+INSERT into Positions (AccountID, Security, Updated, Quantity) VALUES(52355, 'BAC',NOW(), -2400);
+
+INSERT INTO TradeStatusHistory(TradeID, State, ChangedAt)
+SELECT ID, State, CURRENT_TIMESTAMP AT TIME ZONE 'UTC' FROM Trades;
+
+COMMIT;

@@ -5,7 +5,9 @@ ARG VARIANT="21"
 FROM mcr.microsoft.com/vscode/devcontainers/java:1-${VARIANT}
 
 WORKDIR /account-service
-COPY . .
+COPY account-service .
+COPY client-records /client-records
+COPY database/initialSchema.sql /database/initialSchema.sql
 
 EXPOSE 18088
 

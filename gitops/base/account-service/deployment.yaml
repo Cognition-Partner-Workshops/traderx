@@ -19,6 +19,11 @@ spec:
       containers:
         - name: account-service
           env:
+            - name: TRADERX_REFERENCE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: traderx-reference
+                  key: TRADERX_REFERENCE_SECRET
             - name: ACCOUNT_SERVICE_PORT
               value: "18088"
             - name: DATABASE_TCP_HOST

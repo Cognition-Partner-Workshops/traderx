@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import finos.traderx.accountservice.exceptions.ResourceNotFoundException;
 import finos.traderx.accountservice.model.Account;
+import finos.traderx.accountservice.model.AccountNumberMask;
 import finos.traderx.accountservice.model.AccountUser;
 import finos.traderx.accountservice.repository.AccountRepository;
 import finos.traderx.accountservice.repository.AccountUserRepository;
@@ -39,7 +40,7 @@ public class AccountUserService {
 	public AccountUser upsertAccountUser(AccountUser accountUser) {
 		Optional<Account> account = this.accountRepository.findById(accountUser.getAccountId());
 		if (account.isEmpty()) {
-			throw new ResourceNotFoundException("Account with id " + accountUser.getAccountId() + "not found");
+			throw new ResourceNotFoundException("Account with id " + AccountNumberMask.mask(accountUser.getAccountId()) + " not found");
 		}
 		return this.accountUserRepository.save(accountUser);
 	}

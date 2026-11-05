@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { AgGridModule } from 'ag-grid-angular';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AccountService } from '../service/account.service';
-import { Account } from '../model/account.model';
+import { Account, maskAccountNumber } from '../model/account.model';
 import { debounceTime, map, switchMap } from 'rxjs/operators';
 import { ButtonCellRendererComponent } from './button-renderer.component';
 import { AccountUser, User } from '../model/user.model';
@@ -19,13 +19,14 @@ export class AccountComponent implements OnInit {
 
     accounts$: Observable<Account[]>;
     users$: Observable<AccountUser[]>;
-    accountBehaviorSubject = new BehaviorSubject(0);
+    accountBehaviorSubject = new BehaviorSubject<number | string>(0);
     accountAddAction$ = this.accountBehaviorSubject.asObservable();
     selectedAccount?: Account = undefined;
     accountToBeUpdate?: Account = undefined;
     columnDefs: ColDef[] = [
         {
             field: 'id',
+            valueFormatter: (params) => params.data?.accountNumber ?? maskAccountNumber(params.value),
             flex: 1
         },
         {
@@ -45,6 +46,7 @@ export class AccountComponent implements OnInit {
     columnDefsUser: ColDef[] = [
         {
             field: 'accountId',
+            valueFormatter: (params) => params.data?.accountNumber ?? maskAccountNumber(params.value),
             flex: 1
         },
         {

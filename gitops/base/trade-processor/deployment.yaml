@@ -21,6 +21,11 @@ spec:
         ports:
         - containerPort: 18091
         env:
+        - name: TRADERX_REFERENCE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: traderx-reference
+              key: TRADERX_REFERENCE_SECRET
         - name: DATABASE_TCP_HOST
           value: database
         - name: TRADE_FEED_HOST

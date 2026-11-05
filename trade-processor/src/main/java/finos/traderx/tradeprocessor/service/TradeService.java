@@ -9,7 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
+import finos.traderx.records.AccountReferenceLookup;
 
 import finos.traderx.messaging.PubSubException;
 import finos.traderx.messaging.Publisher;
@@ -18,12 +22,17 @@ import finos.traderx.tradeprocessor.repository.*;
 
 @Service
 public class TradeService {
+	@Autowired(required = false)
+	private AccountReferenceLookup accountReferences;
 	Logger log= LoggerFactory.getLogger(TradeService.class);
 	@Autowired
 	TradeRepository tradeRepository;
 
 	@Autowired
 	PositionRepository positionRepository;
+
+	@Autowired
+	TradeStatusHistoryRepository tradeStatusHistoryRepository;
 
 	
     @Autowired 
@@ -32,6 +41,7 @@ public class TradeService {
     @Autowired
     private Publisher<Position> positionPublisher;
     
+	@Transactional
 	public TradeBookingResult processTrade(TradeOrder order) {
 		log.info("Trade order received : "+order);
         Trade t=new Trade();
@@ -59,29 +69,43 @@ public class TradeService {
 		int newQuantity=((order.getSide()==TradeSide.Buy)?1:-1)*t.getQuantity();
 		position.setQuantity(position.getQuantity()+newQuantity);
 		log.info("Trade {}",t);
-		tradeRepository.save(t);
+		saveWithStatusHistory(t);
 		positionRepository.save(position);
 		// Simulate the handling of this trade...
 		// Now mark as processing
-		t.setUpdated(new Date());
-		t.setState(TradeState.Processing);
+		changeState(t, TradeState.Processing);
 		// Now mark as settled
-		t.setUpdated(new Date());
-		t.setState(TradeState.Settled);
-		tradeRepository.save(t);
+		changeState(t, TradeState.Settled);
 		
 
 		TradeBookingResult result=new TradeBookingResult(t, position);
 		log.info("Trade Processing complete : "+result);
-		try{
-			log.info("Publishing : "+result);
-			tradePublisher.publish("/accounts/"+order.getAccountId()+"/trades", result.getTrade());
-			positionPublisher.publish("/accounts/"+order.getAccountId()+"/positions", result.getPosition());
-		} catch (PubSubException exc){
-			log.error("Error publishing trade "+order,exc);
-		}
+		String reference = accountReferences == null ? order.getAccountId().toString() : accountReferences.reference(order.getAccountId());
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				try {
+					log.info("Publishing : "+result);
+					tradePublisher.publish("/accounts/"+reference+"/trades", result.getTrade());
+					positionPublisher.publish("/accounts/"+reference+"/positions", result.getPosition());
+				} catch (PubSubException exc) {
+					log.error("Error publishing trade "+order,exc);
+				}
+			}
+		});
 		
 		return result;	
+	}
+
+	private void changeState(Trade t, TradeState state) {
+		t.setUpdated(new Date());
+		t.setState(state);
+		saveWithStatusHistory(t);
+	}
+
+	private void saveWithStatusHistory(Trade t) {
+		tradeRepository.save(t);
+		tradeStatusHistoryRepository.save(new TradeStatusHistory(t.getId(), t.getState(), t.getUpdated().toInstant()));
 	}
 
 }

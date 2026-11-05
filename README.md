@@ -103,7 +103,7 @@ As of writing, personal Github accounts receive 120 free core hours per month fo
 
 Once you have cloned the repository locally or once your Codespace has started, from the root traderX directory run
 ```
-docker compose up
+python3 local-reference-secret.py docker compose up
 ```
 On first run this will build all of the containers from the project specific Dockerfile's and then start them in the correct sequence.
 
@@ -154,15 +154,29 @@ gradle --settings-file .corp/settings.gradle build
 gradle --settings-file .corp/settings.gradle database:build
 
 # Run specific project
-gradle --settings-file .corp/settings.gradle account-service:bootRun
+python3 local-reference-secret.py gradle --settings-file .corp/settings.gradle account-service:bootRun
 
 ##### From inside the .corp directory ####
 cd .corp
 ./gradlew build
-./gradlew account-service:bootRun
+python3 ../local-reference-secret.py ./gradlew account-service:bootRun
 ```
 
 ## Usage (K8s)
+
+For non-Tilt deployments, provision the `traderx-reference` Kubernetes Secret in
+the deployment namespace with key `TRADERX_REFERENCE_SECRET` before applying
+the workloads. All four Java services reference that required Secret; ingress
+only proxies requests and must not receive the key. Use a stable, randomly
+generated value from your secret manager, never a committed literal.
+
+Tilt provisions the local Secret automatically. Local Compose and individual
+Gradle runs use `local-reference-secret.py`, which honors an exported
+`TRADERX_REFERENCE_SECRET` or atomically creates a private random key at
+`${XDG_STATE_HOME:-$HOME/.local/state}/traderx/reference-secret` (mode 0600).
+Python 3 is required for this local helper. The key persists across local
+restarts and separate service launches; deleting it rotates legacy trade
+references. Direct Compose usage without an exported key fails closed.
 
 The following are instructions to build and deploy all TraderX apps to your local enviroment using [tilt](https://tilt.dev) and kustomize files.
 
@@ -197,6 +211,28 @@ tilt up
 
 A great way to interact with the TraderX community is to attend the bi-weekly Friday TraderX meetings.
 Email help@finos.org to be added to the meeting invite directly, or find the meeting in the [FINOS Community Calendar](https://calendar.finos.org/).
+
+## Client record references
+
+Account-routing references are random UUIDs persisted in the Accounts table;
+they are not hashes of account numbers. New trade IDs are also random UUIDs.
+Legacy trade/order IDs of the form `TRADE-<account>-<suffix>` are instead
+serialized as HMAC-SHA256 references so predictable legacy suffixes cannot be
+used for an offline account-number dictionary.
+
+Before serving legacy records, provision `TRADERX_REFERENCE_SECRET` in the
+server environment of trade-service, trade-processor, and any other JVM emitting
+legacy IDs. Generate a cryptographically random value once, for example with
+`openssl rand -hex 32`, and retain it in the deployment's protected secret store.
+Use the same persisted value across those services, replicas and restarts.
+Never commit the value or expose it to browsers or logs. The server-side JVM
+property `traderx.reference.secret` is also supported and takes precedence.
+Legacy-ID serialization fails closed if the configured value is missing or
+shorter than 32 characters; there is no unkeyed fallback. Rotating the secret
+changes legacy public IDs, so clients should reload their trade lists after
+rotation or upgrade. Random trade IDs and account-routing references are
+unchanged and do not require this secret. Routing references do not replace
+authorization.
 
 ## Contributing
 

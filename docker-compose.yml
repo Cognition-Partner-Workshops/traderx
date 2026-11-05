@@ -79,8 +79,8 @@ services:
     restart: always
     image: account-service
     build:
-      context: account-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: account-service/Dockerfile
     working_dir: /account-service
     expose:
       - 18088
@@ -89,6 +89,7 @@ services:
     environment:
       - DATABASE_TCP_HOST=database
       - PEOPLE_SERVICE_HOST=people-service
+      - TRADERX_REFERENCE_SECRET=${TRADERX_REFERENCE_SECRET:?Supply TRADERX_REFERENCE_SECRET or use local-reference-secret.py}
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
@@ -102,8 +103,8 @@ services:
     restart: always
     image: position-service
     build:
-      context: position-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: position-service/Dockerfile
     working_dir: /position-service
     expose:
       - 18090
@@ -111,6 +112,7 @@ services:
       - 18090:18090
     environment:
       - DATABASE_TCP_HOST=database
+      - TRADERX_REFERENCE_SECRET=${TRADERX_REFERENCE_SECRET:?Supply TRADERX_REFERENCE_SECRET or use local-reference-secret.py}
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
@@ -123,8 +125,8 @@ services:
     restart: always
     image: trade-service
     build:
-      context: trade-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: trade-service/Dockerfile
     working_dir: /trade-service
     expose:
       - 18092
@@ -132,6 +134,7 @@ services:
       - 18092:18092
     environment:
       - DATABASE_TCP_HOST=database
+      - TRADERX_REFERENCE_SECRET=${TRADERX_REFERENCE_SECRET:?Supply TRADERX_REFERENCE_SECRET or use local-reference-secret.py}
       - PEOPLE_SERVICE_HOST=people-service
       - ACCOUNT_SERVICE_HOST=account-service
       - REFERENCE_DATA_HOST=reference-data
@@ -152,8 +155,8 @@ services:
     restart: always
     image: trade-processor
     build:
-      context: trade-processor
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: trade-processor/Dockerfile
     working_dir: /trade-processor
     expose:
       - 18091
@@ -161,6 +164,7 @@ services:
       - 18091:18091
     environment:
       - DATABASE_TCP_HOST=database
+      - TRADERX_REFERENCE_SECRET=${TRADERX_REFERENCE_SECRET:?Supply TRADERX_REFERENCE_SECRET or use local-reference-secret.py}
       - TRADE_FEED_HOST=trade-feed
     volumes:
       # Mount the root folder that contains .git

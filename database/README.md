@@ -6,7 +6,11 @@
 
 This is designed to play the role of a SQL database that runs standalone as part of an example environment. The other processes in this environment interact with this via SQL / JDBC drivers and therefore this component can be swapped out in other iterations of this environment and replaced with a robust and productionizable RDBMS.
 
-This uses H2 Java-based database as a standalone server, has NO authentication by default, and initializes with an empty SQL schema every time it is started.
+This uses H2 Java-based database as a standalone server and has NO authentication by default. A new database is initialized with sample data. Existing databases are preserved and upgraded with `clientRecordsMigration.sql` on startup.
+
+The trade processor appends status history in the same transaction as the trade write. History timestamps use UTC and database history rows reject updates and deletes. Prior transitions discarded by older versions cannot be reconstructed; migration does not invent historical timestamps.
+
+Accounts have persistent random public references. Account and account-user JSON uses these references for routing keys and supplies `accountNumber` containing only the last four digits. Trade and position responses retain masked account numbers. Orders carry a public reference; the trade-feed boundary replaces internal numeric keys before broadcasting to any client. Routes and request bodies resolve references back to internal numeric keys; database keys are unchanged. Numeric input remains accepted for internal compatibility. References are routing identifiers, not an authorization mechanism.
 
 ## Default Port Numbers
 | Protocol | Port Number |

@@ -5,7 +5,9 @@ ARG VARIANT="21"
 FROM mcr.microsoft.com/vscode/devcontainers/java:1-${VARIANT}
 
 WORKDIR /trade-processor
-COPY . .
+COPY trade-processor .
+COPY client-records /client-records
+COPY database/initialSchema.sql /database/initialSchema.sql
 
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \

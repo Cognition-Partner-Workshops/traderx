@@ -15,3 +15,5 @@
 }
 
 rootProject.name = 'trade-service'
+include 'client-records'
+project(':client-records').projectDir = file('../client-records')
