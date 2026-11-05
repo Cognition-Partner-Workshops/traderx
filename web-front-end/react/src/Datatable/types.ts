@@ -6,6 +6,7 @@ export interface TradeData {
 	security: string;
 	side?: TradeSide;
 	state?: string;
+	settlementDate: string;
 	quantity: number;
 	updated?: Date;
 	created?: Date;

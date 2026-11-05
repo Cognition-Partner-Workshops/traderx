@@ -39,9 +39,15 @@ export const Datatable = () => {
 		socket.emit(SUBSCRIBE,`/accounts/${event.target.value}/trades`);
 		socket.emit(SUBSCRIBE,`/accounts/${event.target.value}/positions`);
 		socket.on(PUBLISH, (data:any) => {
+			if (data.from === 'System') return;
 			if (data.topic === `/accounts/${event.target.value}/trades`) {
 				console.log("INCOMING TRADE DATA: ", data);
-				setTradeRowData((current: TradeData[]) => [...current, data.payload]);
+				setTradeRowData((current: TradeData[]) => {
+					const exists = current.some(trade => trade.id === data.payload.id);
+					return exists
+						? current.map(trade => trade.id === data.payload.id ? { ...trade, ...data.payload } : trade)
+						: [...current, data.payload];
+				});
 			}
 			if (data.topic === `/accounts/${event.target.value}/positions`) {
 				console.log("INCOMING POSITION DATA: ", data);
@@ -52,7 +58,7 @@ export const Datatable = () => {
 
 	useEffect(() => {
 			const positionKeys = ['security','quantity','updated'];
-			const tradeKeys = ['security','quantity','side','state','updated'];
+			const tradeKeys = ['security','quantity','side','state','settlementDate','updated'];
 			setPositionRowData(positionData);
 			setTradeRowData(tradeData);
 			setPositionColumnDefs([])

@@ -49,7 +49,7 @@ curl --fail-with-body -i http://localhost:18092/trade/ \
 curl --fail-with-body http://localhost:18090/trades/22214
 ```
 
-POST returns HTTP 200 with the submitted order. Processing is asynchronous, so poll the trades endpoint until the new IBM Buy for quantity 10 has state Settled. The processor assigns a new UUID instead of preserving the submitted order ID. Compare the trades before and after booking to distinguish the new trade from seeded rows. Repeating POST books another trade.
+POST returns HTTP 200 with the submitted order. Processing is asynchronous, so poll the trades endpoint until the new IBM Buy for quantity 10 has state Processing and an ISO settlementDate. The date is the next Monday–Friday business day after the UTC booking date (Friday through Sunday settle Monday). The processor settles it on or after that date without moving positions again. The processor assigns a new UUID instead of preserving the submitted order ID. Compare the trades before and after booking to distinguish the new trade from seeded rows. Repeating POST books another trade.
 
 ## Tests
 
@@ -62,7 +62,7 @@ Run the Java unit tests with the root Gradle wrapper:
 ./gradlew :database:test
 ```
 
-Processor and position tests use Mockito and run independently of the stack. Reports appear under each service's build/reports/tests/test directory. Account-service and trade-service still contain legacy tests under src/main/test; the default Gradle test task does not discover those files. Database currently has no Java tests.
+Processor, position and database tests run independently of the stack, including H2 persistence and REST tests for settlement. Reports appear under each service's build/reports/tests/test directory. Account-service and trade-service still contain legacy tests under src/main/test; the default Gradle test task does not discover those files.
 
 Run Node tests inside the installed service containers:
 
@@ -73,7 +73,9 @@ docker compose -p fsx_20261105_traderx exec -T web-front-end-angular npm run tes
 docker compose -p fsx_20261105_traderx exec -T trade-feed npm test
 ```
 
-Angular's Karma tests require a Chrome installation compatible with Puppeteer. The frontend image skips Puppeteer's browser download, so install the browser before running Karma tests. The Angular suite also has a preexisting stale getRowNodeId reference in trade-blotter.component.spec.ts. Trade-feed's test script currently exits with "no test specified".
+Angular's Karma tests require Chrome. The frontend image skips Puppeteer's browser download, so install the browser or set PUPPETEER_EXECUTABLE_PATH to an existing Chrome executable before running Karma tests. Trade-feed's test script currently exits with "no test specified".
+
+The React suite runs with `CI=true npm test -- --watchAll=false --runInBand` from `web-front-end/react`. Type-check both clients with `npx tsc --noEmit` (use `-p tsconfig.spec.json` and `-p tsconfig.app.json` for Angular). Angular's legacy `npm run lint` references a removed TSLint builder; use TypeScript diagnostics until its lint tooling is migrated.
 
 Run the .NET test command inside people-service:
 

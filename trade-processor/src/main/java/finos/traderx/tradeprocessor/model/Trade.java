@@ -2,6 +2,7 @@ package finos.traderx.tradeprocessor.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,6 +18,17 @@ import jakarta.persistence.Table;
 public class Trade implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+    @Column(name = "SETTLEMENTDATE", nullable = false)
+    private LocalDate settlementDate;
+
+    public LocalDate getSettlementDate() {
+        return settlementDate;
+    }
+
+    public void setSettlementDate(LocalDate settlementDate) {
+        this.settlementDate = settlementDate;
+    }
 
     @Column(length = 100, name = "ID")
     @Id

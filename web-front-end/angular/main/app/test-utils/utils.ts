@@ -38,6 +38,7 @@ export function createTrade(): Trade {
     created: faker.date.recent(),
     id: faker.random.alpha(5),
     state: State.Pending,
+    settlementDate: '2026-11-09',
     side: Side.Buy,
     ...createPosition()
   };
