@@ -1,12 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { corsOptions } from './cors';
 
 const port = parseInt(process.env.REFERENCE_DATA_SERVICE_PORT, 10) || 18085;
 const hostname = process.env.REFERENCE_DATA_HOSTNAME || '0.0.0.0';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule, { cors: true });
+    const app = await NestFactory.create(AppModule, { cors: corsOptions() });
 
     const config = new DocumentBuilder()
         .setTitle('Reference Data Example')

@@ -5,7 +5,9 @@ const http = require('http').createServer(app);
 
 const io = new sockio.Server(http, {
   cors: {
-    origin: "*",
+    // Comma-separated allow-list; "*" entries are ignored so every origin can never be allowed.
+    origin: (process.env.CORS_ALLOWED_ORIGINS ?? "http://localhost:8080,http://localhost:18093,http://localhost:18094")
+      .split(",").map((origin) => origin.trim()).filter((origin) => origin !== "" && origin !== "*"),
     methods: ["GET", "POST"]
   }
 });
