@@ -1,6 +1,8 @@
 package finos.traderx.accountservice.model;
 
 import java.io.Serializable;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,6 +26,8 @@ public class Account implements Serializable {
 		private int id;
 
 		@Column(length = 50, name = "DisplayName")
+		@NotBlank
+		@Size(max = 50)
 		private String displayName;
 
 		public int getId() {

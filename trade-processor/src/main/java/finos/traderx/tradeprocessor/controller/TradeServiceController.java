@@ -1,6 +1,7 @@
 package finos.traderx.tradeprocessor.controller;
 
 import org.slf4j.Logger;
+import jakarta.validation.Valid;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class TradeServiceController {
  
 
 	@PostMapping("/order")
-	public ResponseEntity<TradeBookingResult> processOrder(@RequestBody TradeOrder order) {
+	public ResponseEntity<TradeBookingResult> processOrder(@Valid @RequestBody TradeOrder order) {
 		TradeBookingResult result= tradeService.processTrade(order);
 		return ResponseEntity.ok(result);
 	}

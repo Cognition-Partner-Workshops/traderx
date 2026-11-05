@@ -37,22 +37,32 @@ describe('Account add/update tests', () => {
   });
 
   it('should add new account and show success message', () => {
+    const service = TestBed.inject(AccountService);
+    spyOn(service, 'addAccount').and.callThrough();
+    spyOn(service, 'updateAccount').and.callThrough();
     spyOn(comp.update, 'emit');
     comp.displayName = testAccount.displayName;
     fixture.detectChanges();
     comp.add();
 
+    expect(service.addAccount).toHaveBeenCalledWith(jasmine.objectContaining({ displayName: testAccount.displayName }));
+    expect(service.updateAccount).not.toHaveBeenCalled();
     expect(comp.accountResponse.success).toBe(true);
     expect(comp.accountResponse.msg).toBe('Account added successfully!');
     expect(comp.update.emit).toHaveBeenCalled();
   });
 
   it('should add update account and show success message', () => {
+    const service = TestBed.inject(AccountService);
+    spyOn(service, 'addAccount').and.callThrough();
+    spyOn(service, 'updateAccount').and.callThrough();
     spyOn(comp.update, 'emit');
     comp.account =  testAccount;
     fixture.detectChanges();
     comp.add();
 
+    expect(service.updateAccount).toHaveBeenCalledWith(testAccount);
+    expect(service.addAccount).not.toHaveBeenCalled();
     expect(comp.accountResponse.success).toBe(true);
     expect(comp.accountResponse.msg).toBe('Account updated successfully!');
     expect(comp.update.emit).toHaveBeenCalled();

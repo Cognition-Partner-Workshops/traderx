@@ -38,6 +38,15 @@ export class AccountService {
     );
   }
 
+  updateAccount(account: Partial<Account>) {
+    return this.http.put<Partial<Account>>(`${this.baseUrl}/account/`, account, this.httpOptions).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error(error);
+        return throwError(() => error);
+      })
+    );
+  }
+
   addAccountUser(accountUser: AccountUser) {
     return this.http.post<AccountUser>(`${this.baseUrl}/accountuser/`, accountUser, this.httpOptions).pipe(
       catchError((error: HttpErrorResponse) => {

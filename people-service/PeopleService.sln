@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeopleService.Core", "Peopl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeopleService.WebApi", "PeopleService.WebApi\PeopleService.WebApi.csproj", "{1AD2ABF8-540F-48D6-A902-F7D088A56AC7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeopleService.Core.Tests", "PeopleService.Core.Tests\PeopleService.Core.Tests.csproj", "{5C9B3B1B-E6DC-4BFB-BE52-D1A9FD7BE01C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{1AD2ABF8-540F-48D6-A902-F7D088A56AC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AD2ABF8-540F-48D6-A902-F7D088A56AC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AD2ABF8-540F-48D6-A902-F7D088A56AC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C9B3B1B-E6DC-4BFB-BE52-D1A9FD7BE01C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C9B3B1B-E6DC-4BFB-BE52-D1A9FD7BE01C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C9B3B1B-E6DC-4BFB-BE52-D1A9FD7BE01C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C9B3B1B-E6DC-4BFB-BE52-D1A9FD7BE01C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

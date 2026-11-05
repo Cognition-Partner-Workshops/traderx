@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.Optional;
 
 import finos.traderx.accountservice.exceptions.ResourceNotFoundException;
+import finos.traderx.accountservice.exceptions.AccountUserConflictException;
 import finos.traderx.accountservice.model.Account;
 import finos.traderx.accountservice.model.AccountUser;
 import finos.traderx.accountservice.repository.AccountRepository;
 import finos.traderx.accountservice.repository.AccountUserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,6 +44,27 @@ public class AccountUserService {
 			throw new ResourceNotFoundException("Account with id " + accountUser.getAccountId() + "not found");
 		}
 		return this.accountUserRepository.save(accountUser);
+	}
+
+	public AccountUser createAccountUser(AccountUser accountUser) {
+		if (!this.accountRepository.existsById(accountUser.getAccountId())) {
+			throw new ResourceNotFoundException("Account not found");
+		}
+		if (this.accountUserRepository.existsByAccountIdAndUsername(accountUser.getAccountId(), accountUser.getUsername())) {
+			throw new AccountUserConflictException();
+		}
+		try {
+			return this.accountUserRepository.save(accountUser);
+		} catch (DataIntegrityViolationException e) {
+			throw new AccountUserConflictException();
+		}
+	}
+
+	public AccountUser updateAccountUser(AccountUser accountUser) {
+		if (!this.accountUserRepository.existsByAccountIdAndUsername(accountUser.getAccountId(), accountUser.getUsername())) {
+			throw new ResourceNotFoundException("Account user not found");
+		}
+		return upsertAccountUser(accountUser);
 	}
 
 }

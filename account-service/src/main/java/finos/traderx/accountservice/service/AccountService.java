@@ -34,4 +34,15 @@ public class AccountService {
 	public Account upsertAccount(Account account) {
 		return this.accountRepository.save(account);
 	}
+
+	public Account createAccount(Account account) {
+		Account created = new Account();
+		created.setDisplayName(account.getDisplayName());
+		return this.accountRepository.save(created);
+	}
+
+	public Account updateAccount(Account account) {
+		getAccountById(account.getId());
+		return this.accountRepository.save(account);
+	}
 }
