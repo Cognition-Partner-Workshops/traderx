@@ -3,48 +3,6 @@ extension radius
 // Parameters
 param application string
 
-// Kubernetes hardening applied as a PodSpec strategic-merge patch (runtimes.kubernetes.pod):
-// non-root, no privilege escalation, read-only root filesystem with emptyDir scratch space,
-// all capabilities dropped and the RuntimeDefault seccomp profile.
-func hardenedRuntime(containerName string, writableDirs string[]) object => {
-  kubernetes: {
-    pod: {
-      securityContext: {
-        runAsNonRoot: true
-        runAsUser: 10001
-        runAsGroup: 10001
-        fsGroup: 10001
-        seccompProfile: {
-          type: 'RuntimeDefault'
-        }
-      }
-      volumes: map(concat(['/tmp'], writableDirs), (dir, i) => {
-        name: 'scratch-${i}'
-        emptyDir: {}
-      })
-      containers: [
-        {
-          name: containerName
-          securityContext: {
-            allowPrivilegeEscalation: false
-            privileged: false
-            readOnlyRootFilesystem: true
-            capabilities: {
-              drop: [
-                'ALL'
-              ]
-            }
-          }
-          volumeMounts: map(concat(['/tmp'], writableDirs), (dir, i) => {
-            name: 'scratch-${i}'
-            mountPath: dir
-          })
-        }
-      ]
-    }
-  }
-}
-
 resource database 'Applications.Core/containers@2023-10-01-preview' = {
   name: 'database'
   properties: {
@@ -332,6 +290,48 @@ resource ingress 'Applications.Core/containers@2023-10-01-preview' = {
       webfrontend: {
         source: webfrontend.id
       }
+    }
+  }
+}
+
+// Kubernetes hardening applied as a PodSpec strategic-merge patch (runtimes.kubernetes.pod):
+// non-root, no privilege escalation, read-only root filesystem with emptyDir scratch space,
+// all capabilities dropped and the RuntimeDefault seccomp profile.
+func hardenedRuntime(containerName string, writableDirs string[]) object => {
+  kubernetes: {
+    pod: {
+      securityContext: {
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile: {
+          type: 'RuntimeDefault'
+        }
+      }
+      volumes: map(concat(['/tmp'], writableDirs), (dir, i) => {
+        name: 'scratch-${i}'
+        emptyDir: {}
+      })
+      containers: [
+        {
+          name: containerName
+          securityContext: {
+            allowPrivilegeEscalation: false
+            privileged: false
+            readOnlyRootFilesystem: true
+            capabilities: {
+              drop: [
+                'ALL'
+              ]
+            }
+          }
+          volumeMounts: map(concat(['/tmp'], writableDirs), (dir, i) => {
+            name: 'scratch-${i}'
+            mountPath: dir
+          })
+        }
+      ]
     }
   }
 }
