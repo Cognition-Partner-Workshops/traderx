@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
 import finos.traderx.records.AccountReferenceLookup;
 
@@ -78,14 +80,19 @@ public class TradeService {
 
 		TradeBookingResult result=new TradeBookingResult(t, position);
 		log.info("Trade Processing complete : "+result);
-		try{
-			log.info("Publishing : "+result);
-			String reference = accountReferences == null ? order.getAccountId().toString() : accountReferences.reference(order.getAccountId());
-			tradePublisher.publish("/accounts/"+reference+"/trades", result.getTrade());
-			positionPublisher.publish("/accounts/"+reference+"/positions", result.getPosition());
-		} catch (PubSubException exc){
-			log.error("Error publishing trade "+order,exc);
-		}
+		String reference = accountReferences == null ? order.getAccountId().toString() : accountReferences.reference(order.getAccountId());
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				try {
+					log.info("Publishing : "+result);
+					tradePublisher.publish("/accounts/"+reference+"/trades", result.getTrade());
+					positionPublisher.publish("/accounts/"+reference+"/positions", result.getPosition());
+				} catch (PubSubException exc) {
+					log.error("Error publishing trade "+order,exc);
+				}
+			}
+		});
 		
 		return result;	
 	}
