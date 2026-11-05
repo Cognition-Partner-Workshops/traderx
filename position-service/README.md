@@ -18,8 +18,13 @@ All GET endpoints under `/positions/` and `/trades/` require the
 Account-specific requests return 403 unless the username has an entry for that
 account in the shared database's `AccountUsers(AccountID, Username)` mapping.
 Collection requests return only records belonging to the caller's accounts.
-The header must be supplied by a trusted authentication proxy that strips any
-client-supplied value; do not expose this service directly to untrusted clients.
+The bundled nginx ingress strips this header, as does the Kubernetes nginx
+ingress configuration (which requires configuration snippets to be enabled).
+These ingress configurations do not authenticate users, so requests through them
+return 401 until a real identity-aware proxy is configured to set the header from
+verified identity, replacing any client-supplied value. Do not expose this service
+directly to untrusted clients; the Docker Compose development port remains
+published and bypasses ingress protection.
 
 In this project, you can run the database by running a shell in the [database](../database/README.md) project and running
 
