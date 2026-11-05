@@ -29,7 +29,8 @@ export class EditAccountComponent {
             return;
         }
         const account = Object.assign(this.account || {}, { displayName: this.displayName }) as Account;
-        this.accountService.addAccount(account).subscribe(() => {
+        const request = account.id ? this.accountService.updateAccount(account) : this.accountService.addAccount(account);
+        request.subscribe(() => {
             this.accountResponse = { success: true, msg: `Account ${account.id ? 'updated' : 'added'} successfully!` };
             this.update.emit(account);
             this.reset();
