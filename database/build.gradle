@@ -29,6 +29,14 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
+tasks.register('remoteAccessTest', Exec) {
+    description = 'SSC-01: asserts the H2 web console and PG server are not exposed to remote clients.'
+    group = 'verification'
+    commandLine 'bash', 'src/test/sh/run_sh_remote_access_test.sh'
+}
+
+check.dependsOn remoteAccessTest
+
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }

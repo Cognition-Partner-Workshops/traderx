@@ -27,8 +27,8 @@ The default username and password are both `sa`
 
 The database you want to use in the H2 GUI is `./traderx` (This may not be the default listed in the GUI)
 
-## Using Web Console behind proxy/K8S/Env
-By default, the hostname, localhost, 127.0.0.1 are all valid host headers to access the database. If you wish to connect using another IP, or via some proxy/gateway that's set up through K8S or other environment, you will need to specify the hostname your browser is using to access the web console. This is done by setting the environment variable `$DATABASE_WEB_HOSTNAMES` to the hostname you are using to access the web console. This is a comma-delimited list of fully qualified hostnames.
+## Network exposure (SSC-01)
+Only the TCP server (`$DATABASE_TCP_PORT`, default 18082) accepts remote connections, because the other TraderX services connect to it over JDBC (`jdbc:h2:tcp://database:18082/traderx`). The PG server and the web console only accept connections from the same host/container and their ports are not published by docker-compose, the Dockerfile or the ingress. To use the web console, run it from inside the container (e.g. `docker compose exec database curl http://localhost:18084`) or port-forward to the container.
 
 ## Output Directory
 Data is stored in the local `./_data` directory from where the script is run. This is .gitignore'd 
@@ -66,10 +66,10 @@ You will see the following output
 ```
 
 Runing startup script
-Web Console server running at http://[your IP]:18084 (others can connect)
+Web Console server running at http://[your IP]:18084 (only local connections)
 finished startup script
 TCP server running at tcp://[your IP]:18082 (others can connect)
-PG server running at pg://[your IP]:18083 (others can connect)
+PG server running at pg://[your IP]:18083 (only local connections)
 ```
 
 On my windows PC, it actually doesn't work with the public IP address. Just change the above URLs/Host Addresses to use `localhost`  and they work fine.

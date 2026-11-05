@@ -3,8 +3,6 @@ version: '3.4'
 services:
   database:
     restart: always
-    environment:
-      - DATABASE_WEB_HOSTNAMES=${TRADERX_FQDN:-localhost}
     image: database
     build:
       context: database
@@ -12,12 +10,8 @@ services:
     working_dir: /database
     expose:
       - 18082
-      - 18083
-      - 18084
     ports:
       - 18082:18082
-      - 18083:18083
-      - 18084:18084
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
