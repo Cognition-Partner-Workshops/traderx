@@ -7,9 +7,11 @@ import { SelectChangeEvent } from '@mui/material';
 import { socket } from '../socket';
 import { GetPositions, GetTrades } from '../hooks';
 import { CreateAccount, CreateAccountUser, CreateTradeButton } from '../ActionButtons';
-import { ColDef } from 'ag-grid-community';
+import { AllCommunityModule, ColDef, ModuleRegistry } from 'ag-grid-community';
 import { PositionData, TradeData } from './types';
 import { AccountsDropdown } from '../AccountsDropdown';
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 const PUBLISH='publish';
 const SUBSCRIBE='subscribe';
@@ -73,13 +75,13 @@ return (
 			<CreateAccountUser accountId={selectedId} />
 		</div>
 		<div className="ag-theme-alpine" style={{height: "80vh", width: "50%", float: "left"}}>
-				<AgGridReact
+				<AgGridReact theme="legacy"
 						rowData={tradeRowData}
 						columnDefs={tradeColumnDefs}>
 				</AgGridReact>
 		</div>
 		<div className="ag-theme-alpine" style={{height: "80vh", width: "50%", float: "right"}}>
-			<AgGridReact
+			<AgGridReact theme="legacy"
 					rowData={positionRowData}
 					columnDefs={positionColumnDefs}>
 			</AgGridReact>

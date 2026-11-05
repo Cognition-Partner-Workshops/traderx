@@ -1,8 +1,11 @@
-# Getting Started with Create React App
+# Getting Started with Vite
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project uses [Vite](https://vite.dev/) with Node.js 26 or newer and npm 11 or newer. Run `npm ci` to install dependencies.
 
 ## Available Scripts
+
+`npm test` runs Vitest once. `npm run build` typechecks and builds into `build/`.
+`npm run preview` serves that production build on the same port as development.
 
 In the project directory, you can run:
 
