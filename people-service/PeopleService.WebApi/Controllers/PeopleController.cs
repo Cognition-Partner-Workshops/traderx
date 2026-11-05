@@ -30,16 +30,16 @@ namespace PeopleService.WebApi.Controllers
         [ProducesResponseType(typeof(Person), 200)]
         public async Task<IActionResult> GetPerson([FromQuery] GetPerson.Request request)
         {
-            _logger.LogInformation($"PeopleService.GetPerson called with LogonId: {request.LogonId}, EmployeeId: {request.EmployeeId}");
+            _logger.LogInformation("PeopleService.GetPerson called with LogonId: {LogonId}, EmployeeId: {EmployeeId}", SafeLogValue(request.LogonId), SafeLogValue(request.EmployeeId));
 
             var response = await _mediator.Send(request);
             if (response == null)
             {
-                _logger.LogWarning($"Person not found with LogonId: {request.LogonId}, EmployeeId: {request.EmployeeId}.");
+                _logger.LogWarning("Person not found with LogonId: {LogonId}, EmployeeId: {EmployeeId}.", SafeLogValue(request.LogonId), SafeLogValue(request.EmployeeId));
                 return NotFound();
             }
 
-            _logger.LogInformation($"Person found with LogonId: {request.LogonId}, EmployeeId: {request.EmployeeId}.");
+            _logger.LogInformation("Person found with LogonId: {LogonId}, EmployeeId: {EmployeeId}.", SafeLogValue(request.LogonId), SafeLogValue(request.EmployeeId));
             return Ok(response);
         }
 
@@ -55,16 +55,16 @@ namespace PeopleService.WebApi.Controllers
         [ProducesResponseType(typeof(GetMatchingPeople.Response), 200)]
         public async Task<IActionResult> GetMatchingPeople([FromQuery] GetMatchingPeople.Request request)
         {
-            _logger.LogInformation($"PeopleService.GetMatchingPeople called with searchtext: {request.SearchText}");
+            _logger.LogInformation("PeopleService.GetMatchingPeople called with searchtext: {SearchText}", SafeLogValue(request.SearchText));
 
             var response = await _mediator.Send(request);
             if (response == null)
             {
-                _logger.LogWarning($"People do not exist with searchtext: {request.SearchText}.");
+                _logger.LogWarning("People do not exist with searchtext: {SearchText}.", SafeLogValue(request.SearchText));
                 return NotFound();
             }
 
-            _logger.LogInformation($"People found when using searchtext:  {request.SearchText}.");
+            _logger.LogInformation("People found when using searchtext: {SearchText}.", SafeLogValue(request.SearchText));
             return Ok(response);
         }
 
@@ -79,17 +79,19 @@ namespace PeopleService.WebApi.Controllers
         [HttpGet(nameof(ValidatePerson))]
         public async Task<IActionResult> ValidatePerson([FromQuery] ValidatePerson.Request request)
         {
-            _logger.LogInformation($"PeopleService.ValidatePerson called with LogonId: {request.LogonId}, EmployeeId: {request.EmployeeId}");
+            _logger.LogInformation("PeopleService.ValidatePerson called with LogonId: {LogonId}, EmployeeId: {EmployeeId}", SafeLogValue(request.LogonId), SafeLogValue(request.EmployeeId));
 
             var response = await _mediator.Send(request);
             if (!response.IsValid)
             {
-                _logger.LogWarning($"Person does not exist with LogonId: {request.LogonId}, EmployeeId: {request.EmployeeId}.");
+                _logger.LogWarning("Person does not exist with LogonId: {LogonId}, EmployeeId: {EmployeeId}.", SafeLogValue(request.LogonId), SafeLogValue(request.EmployeeId));
                 return NotFound();
             }
 
-            _logger.LogInformation($"Valid person with LogonId: {request.LogonId}, EmployeeId: {request.EmployeeId}.");
+            _logger.LogInformation("Valid person with LogonId: {LogonId}, EmployeeId: {EmployeeId}.", SafeLogValue(request.LogonId), SafeLogValue(request.EmployeeId));
             return Ok();
         }
+        private static string? SafeLogValue(string? value) =>
+            value?.Replace('\r', '_').Replace('\n', '_');
     }
 }

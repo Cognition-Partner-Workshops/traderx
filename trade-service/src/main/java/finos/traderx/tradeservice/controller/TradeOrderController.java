@@ -1,6 +1,7 @@
 package finos.traderx.tradeservice.controller;
 
 import org.slf4j.Logger;
+import finos.traderx.logging.SafeLog;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,7 +57,7 @@ public class TradeOrderController {
 		else
 		{
 			try{
-				log.info("Trade is valid. Submitting {}", tradeOrder);
+				log.info("Trade is valid. Submitting order");
 				tradePublisher.publish("/trades",tradeOrder);
 				return  ResponseEntity.ok(tradeOrder);
 			}  catch (PubSubException e){
@@ -74,15 +75,15 @@ public class TradeOrderController {
 
 		try {
 			response = this.restTemplate.getForEntity(url, Security.class);
-			log.info("Validate ticker " + response.getBody().toString());
+			log.info("Ticker validated");
 			return true;
 		}
 		catch (HttpClientErrorException ex) {
 			if (ex.getRawStatusCode() == 404) {
-				log.info(ticker + " not found in reference data service.");
+				log.info("Ticker {} not found in reference data service.", SafeLog.value(ticker));
 			}
 			else {
-				log.error(ex.getMessage());
+				log.error("Reference data request failed: {}", SafeLog.exception(ex));
 			}
 			return false;
 		}
@@ -99,15 +100,15 @@ public class TradeOrderController {
 		try 
 		{
 				response = this.restTemplate.getForEntity(url, Account.class);
-				log.info("Validate account " + response.getBody().toString());
+				log.info("Account validated");
 				return true;
 		}
 		catch (HttpClientErrorException ex) {
 			if (ex.getRawStatusCode() == 404) {
-				log.info("Account" + id + " not found in account service.");				
+				log.info("Account {} not found in account service.", id);
 			}
 			else {
-				log.error(ex.getMessage());
+				log.error("Account service request failed: {}", SafeLog.exception(ex));
 			}
 			return false;
 		}
