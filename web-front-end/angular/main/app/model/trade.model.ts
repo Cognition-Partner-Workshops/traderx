@@ -6,6 +6,7 @@ export interface Trade {
     security: string;
     side: Side;
     state: State;
+    settlementDate: string;
     updated: Date;
 }
 

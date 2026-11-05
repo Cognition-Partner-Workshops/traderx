@@ -4,7 +4,15 @@
 
 # trade-processor
 
-A simple application that subscribes to trade-feed pubsub engine, and 'processes' trades. This initially stores them in the database as pending trades and marks them as processed, reporting each phase change on thei appropriate trade-feed as a notification. As trades are settled, it also recalculates any position changes and persists and broadcasts those changes as well.
+A simple application that subscribes to the trade-feed pubsub engine and books trades in `Processing` state. Booking atomically stores the trade and updates positions, then broadcasts both after commit.
+
+## Equity settlement
+
+`SettlementCalendar` assigns the next Monday–Friday business day after the UTC booking date. Friday, Saturday and Sunday bookings all settle Monday; holidays are not modelled. The date is stored as SQL `DATE` and sent as an ISO `settlementDate` string (`YYYY-MM-DD`) in history and live trade messages.
+
+The scheduler checks persisted `Processing` trades every second (`settlement.poll-interval-ms` overrides the interval). On or after the stored date, it locks due trades, marks them `Settled`, and publishes a trade-only update after commit. It catches up after downtime and does not move positions again. `Settled` and `Cancelled` trades are excluded. Production time comes from an injected `Clock.systemUTC()`; tests inject a controlled clock rather than changing trade dates or states.
+
+The database runner recreates the sample schema on startup, as before. Its seeded settled trades now have explicit historical booking and settlement dates. This sample does not introduce a production database migration framework or durable message delivery; feed publication failures are logged and history remains authoritative.
  
 # How to run the application (WIP)
 

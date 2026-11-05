@@ -99,6 +99,11 @@ components:
         state:
           type: string
           example: 'Settled'
+        settlementDate:
+          type: string
+          format: date
+          description: Next Monday–Friday business day after the UTC booking date
+          example: '2026-11-09'
         side:
           type: string
           example: 'Buy or Sell'
