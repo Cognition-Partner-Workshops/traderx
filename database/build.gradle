@@ -29,6 +29,29 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
+tasks.register('remoteAccessTest', Exec) {
+    description = 'SSC-01: asserts the H2 web console and PG server are not exposed to remote clients.'
+    group = 'verification'
+    commandLine 'bash', 'src/test/sh/run_sh_remote_access_test.sh'
+}
+
+check.dependsOn remoteAccessTest
+
+tasks.register('credentialsTest', Exec) {
+    description = 'SSC-03: asserts runtime database credentials have no defaults and missing usernames fail closed.'
+    group = 'verification'
+    commandLine 'bash', 'src/test/sh/run_sh_credentials_test.sh'
+}
+
+check.dependsOn credentialsTest
+
+tasks.register('runtimeAccessTest', Exec) {
+    description = 'SSC-01: starts the DB in Docker and checks auth and remote access at runtime (requires Docker).'
+    group = 'verification'
+    dependsOn jar
+    commandLine 'bash', 'src/test/sh/run_sh_runtime_access_test.sh'
+}
+
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
