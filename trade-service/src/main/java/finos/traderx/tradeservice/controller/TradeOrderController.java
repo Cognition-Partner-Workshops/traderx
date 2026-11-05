@@ -78,7 +78,7 @@ public class TradeOrderController {
 			return true;
 		}
 		catch (HttpClientErrorException ex) {
-			if (ex.getRawStatusCode() == 404) {
+			if (ex.getStatusCode().value() == 404) {
 				log.info(ticker + " not found in reference data service.");
 			}
 			else {
@@ -103,7 +103,7 @@ public class TradeOrderController {
 				return true;
 		}
 		catch (HttpClientErrorException ex) {
-			if (ex.getRawStatusCode() == 404) {
+			if (ex.getStatusCode().value() == 404) {
 				log.info("Account" + id + " not found in account service.");				
 			}
 			else {
