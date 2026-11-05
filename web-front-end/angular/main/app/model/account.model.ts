@@ -1,5 +1,6 @@
 export interface Account {
-    id: number;
+    id: number | string;
+    accountNumber?: string;
     displayName: string;
 }
 

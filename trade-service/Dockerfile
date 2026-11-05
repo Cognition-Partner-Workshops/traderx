@@ -5,7 +5,8 @@ ARG VARIANT="21"
 FROM mcr.microsoft.com/vscode/devcontainers/java:1-${VARIANT}
 
 WORKDIR /trade-service
-COPY . .
+COPY trade-service .
+COPY client-records /client-records
 
 EXPOSE 18092
 

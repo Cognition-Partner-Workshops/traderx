@@ -9,5 +9,6 @@ export interface User {
 
 export interface AccountUser {
     username: string;
-    accountId: number;
+    accountId: number | string;
+    accountNumber?: string;
 }

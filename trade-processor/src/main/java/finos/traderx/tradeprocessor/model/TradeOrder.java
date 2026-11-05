@@ -1,5 +1,9 @@
 package finos.traderx.tradeprocessor.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import finos.traderx.records.AccountReferences;
+
 public class TradeOrder {
 
     public String id;
@@ -7,6 +11,7 @@ public class TradeOrder {
     private String security;
     private Integer quantity;
     private Integer accountId;
+    private String accountReference;
     private TradeSide side;
 
     public TradeOrder(){}
@@ -19,6 +24,7 @@ public class TradeOrder {
         this.id = id;
     }
 
+    @JsonSerialize(using = AccountReferences.TradeIdSerializer.class)
     public String getId() {
         return id;
     }
@@ -27,12 +33,21 @@ public class TradeOrder {
         return state;
     }
 
+    @JsonDeserialize(using = AccountReferences.Deserializer.class)
     public Integer getAccountId() {
         return accountId;
     }
 
     public String getSecurity() {
         return security;
+    }
+
+    public String getAccountReference() {
+        return accountReference;
+    }
+
+    public void setAccountReference(String reference) {
+        this.accountReference = reference;
     }
 
     public Integer getQuantity() {

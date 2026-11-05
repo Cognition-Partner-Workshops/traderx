@@ -15,3 +15,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = 'trade-processor'
+include 'client-records'
+project(':client-records').projectDir = file('../client-records')

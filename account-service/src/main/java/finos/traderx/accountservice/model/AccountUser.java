@@ -1,5 +1,9 @@
 package finos.traderx.accountservice.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import finos.traderx.records.AccountReferences;
+
 import java.io.Serializable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,8 +32,15 @@ public class AccountUser implements Serializable {
 		this.username = username;
 	}
 
+	@JsonSerialize(using = AccountReferences.Serializer.class)
+	@JsonDeserialize(using = AccountReferences.Deserializer.class)
 	public Integer getAccountId() {
 		return this.accountId;
+	}
+
+	@com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+	public String getAccountNumber() {
+		return AccountReferences.masked(accountId);
 	}
 
 	public void setAccountId(Integer accountId) {

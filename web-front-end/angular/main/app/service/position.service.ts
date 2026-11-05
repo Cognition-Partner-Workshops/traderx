@@ -13,13 +13,13 @@ export class PositionService {
     private positionsUrl = `${environment.positionsUrl}/positions/`;
     constructor(private http: HttpClient) { }
 
-    getTrades(account_id: number): Observable<Trade[]> {
+    getTrades(account_id: number | string): Observable<Trade[]> {
         return this.http.get<Trade[]>(this.tradesUrl + account_id ).pipe(
             catchError(this.handleError)
         );
     }
 
-    getPositions(account_id: number): Observable<Position[]> {
+    getPositions(account_id: number | string): Observable<Position[]> {
         return this.http.get<Position[]>(this.positionsUrl + account_id ).pipe(
             catchError(this.handleError)
         );

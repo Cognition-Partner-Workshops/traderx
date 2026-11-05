@@ -32,5 +32,5 @@ export interface TradeTicket {
     side: 'Sell' | 'Buy';
     quantity: number;
     security: string;
-    accountId: number;
+    accountId: number | string;
 }

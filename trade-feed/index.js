@@ -2,6 +2,7 @@ const sockio = require("socket.io");
 const app = require('express')();
 const winston = require('winston');
 const http = require('http').createServer(app);
+const { customerMessage } = require('./customer-message');
 
 const io = new sockio.Server(http, {
   cors: {
@@ -53,17 +54,30 @@ function broadcast(from, data) {
 io.on('connection', (socket) => {
   log.info(`New Connection from ${socket.id}`);
   socket.on(SUBSCRIBE, (topic) => {
+    if (!customerMessage({ topic })) {
+      socket.emit('error', 'Invalid account reference');
+      return;
+    }
     log.info(`Subscribe ${topic}`);
     socket.join(topic);
     broadcast('System', joinMessage(socket.id,topic));
   });
   socket.on(UNSUBSCRIBE, (topic) => {
+    if (!customerMessage({ topic })) {
+      socket.emit('error', 'Invalid account reference');
+      return;
+    }
     log.info(`Unsubscribe ${topic}`);
     broadcast('System', leaveMessage(socket.id,topic));
     socket.leave(topic);
   });
   socket.on(PUBLISH, (data) => {
-    broadcast(socket.id, data);
+    const message = customerMessage(data);
+    if (!message) {
+      socket.emit('error', 'Invalid account reference');
+      return;
+    }
+    broadcast(socket.id, message);
   });
 });
 

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import finos.traderx.records.AccountReferences;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,6 +25,7 @@ public class Trade implements Serializable {
     @Id
 	private String id;
 
+	@JsonSerialize(using = AccountReferences.TradeIdSerializer.class)
 	public String getId() {
 		return this.id;
 	}

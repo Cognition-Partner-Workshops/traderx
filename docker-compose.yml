@@ -79,8 +79,8 @@ services:
     restart: always
     image: account-service
     build:
-      context: account-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: account-service/Dockerfile
     working_dir: /account-service
     expose:
       - 18088
@@ -102,8 +102,8 @@ services:
     restart: always
     image: position-service
     build:
-      context: position-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: position-service/Dockerfile
     working_dir: /position-service
     expose:
       - 18090
@@ -123,8 +123,8 @@ services:
     restart: always
     image: trade-service
     build:
-      context: trade-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: trade-service/Dockerfile
     working_dir: /trade-service
     expose:
       - 18092
@@ -152,8 +152,8 @@ services:
     restart: always
     image: trade-processor
     build:
-      context: trade-processor
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: trade-processor/Dockerfile
     working_dir: /trade-processor
     expose:
       - 18091

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import finos.traderx.records.AccountReferenceLookup;
 
 import finos.traderx.messaging.PubSubException;
 import finos.traderx.messaging.Publisher;
@@ -19,6 +20,8 @@ import finos.traderx.tradeprocessor.repository.*;
 
 @Service
 public class TradeService {
+	@Autowired(required = false)
+	private AccountReferenceLookup accountReferences;
 	Logger log= LoggerFactory.getLogger(TradeService.class);
 	@Autowired
 	TradeRepository tradeRepository;
@@ -77,8 +80,9 @@ public class TradeService {
 		log.info("Trade Processing complete : "+result);
 		try{
 			log.info("Publishing : "+result);
-			tradePublisher.publish("/accounts/"+order.getAccountId()+"/trades", result.getTrade());
-			positionPublisher.publish("/accounts/"+order.getAccountId()+"/positions", result.getPosition());
+			String reference = accountReferences == null ? order.getAccountId().toString() : accountReferences.reference(order.getAccountId());
+			tradePublisher.publish("/accounts/"+reference+"/trades", result.getTrade());
+			positionPublisher.publish("/accounts/"+reference+"/positions", result.getPosition());
 		} catch (PubSubException exc){
 			log.error("Error publishing trade "+order,exc);
 		}

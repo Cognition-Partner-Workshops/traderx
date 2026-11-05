@@ -19,14 +19,14 @@ export class AccountComponent implements OnInit {
 
     accounts$: Observable<Account[]>;
     users$: Observable<AccountUser[]>;
-    accountBehaviorSubject = new BehaviorSubject(0);
+    accountBehaviorSubject = new BehaviorSubject<number | string>(0);
     accountAddAction$ = this.accountBehaviorSubject.asObservable();
     selectedAccount?: Account = undefined;
     accountToBeUpdate?: Account = undefined;
     columnDefs: ColDef[] = [
         {
             field: 'id',
-            valueFormatter: (params) => maskAccountNumber(params.value),
+            valueFormatter: (params) => params.data?.accountNumber ?? maskAccountNumber(params.value),
             flex: 1
         },
         {
@@ -46,7 +46,7 @@ export class AccountComponent implements OnInit {
     columnDefsUser: ColDef[] = [
         {
             field: 'accountId',
-            valueFormatter: (params) => maskAccountNumber(params.value),
+            valueFormatter: (params) => params.data?.accountNumber ?? maskAccountNumber(params.value),
             flex: 1
         },
         {

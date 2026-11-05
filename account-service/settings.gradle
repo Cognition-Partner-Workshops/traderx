@@ -14,3 +14,5 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = 'account-service'
+include 'client-records'
+project(':client-records').projectDir = file('../client-records')
