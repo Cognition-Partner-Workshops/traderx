@@ -8,9 +8,11 @@ A simple application that subscribes to the trade-feed pubsub engine and books t
 
 ## Equity settlement
 
-`SettlementCalendar` assigns the next Monday–Friday business day after the UTC booking date. Friday, Saturday and Sunday bookings all settle Monday; holidays are not modelled. The date is stored as SQL `DATE` and sent as an ISO `settlementDate` string (`YYYY-MM-DD`) in history and live trade messages.
+`SettlementCalendar` assigns the next Monday–Friday business day after the booking date (UTC by default). Friday, Saturday and Sunday bookings all settle Monday; holidays are not modelled. The date is stored as SQL `DATE` and sent as an ISO `settlementDate` string (`YYYY-MM-DD`) in history and live trade messages.
 
-The scheduler checks persisted `Processing` trades every second (`settlement.poll-interval-ms` overrides the interval). On or after the stored date, it locks due trades, marks them `Settled`, and publishes a trade-only update after commit. It catches up after downtime and does not move positions again. `Settled` and `Cancelled` trades are excluded. Production time comes from an injected `Clock.systemUTC()`; tests inject a controlled clock rather than changing trade dates or states.
+The scheduler checks persisted `Processing` trades every second (`settlement.poll-interval-ms` overrides the interval). On or after the stored date, it locks due trades, marks them `Settled`, and publishes a trade-only update after commit. It catches up after downtime and does not move positions again. `Settled` and `Cancelled` trades are excluded. Time comes from an injected clock, defaulting to UTC with no offset; tests inject a controlled clock rather than changing trade dates or states.
+
+For testing/demo only, `settlement.clock.zone` (`SETTLEMENT_CLOCK_ZONE`, default `UTC`) and `settlement.clock.offset` (`SETTLEMENT_CLOCK_OFFSET`, default `PT0S`) configure this shared booking/settlement clock. The offset is a `java.time.Duration` in ISO-8601 format: for example, `SETTLEMENT_CLOCK_OFFSET=PT24H` advances the clock one day so already-booked trades due tomorrow become eligible for settlement. Keep the defaults in normal operation. Changing the clock never recalculates stored settlement dates; new bookings use the shifted date.
 
 The database runner recreates the sample schema on startup, as before. Its seeded settled trades now have explicit historical booking and settlement dates. This sample does not introduce a production database migration framework or durable message delivery; feed publication failures are logged and history remains authoritative.
  
