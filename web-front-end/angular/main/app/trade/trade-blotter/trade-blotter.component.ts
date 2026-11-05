@@ -68,10 +68,6 @@ export class TradeBlotterComponent implements OnChanges, OnDestroy {
         return `Trade-${params.data.id}`;
     }
 
-    getRowNodeId(trade: Trade): string {
-        return trade.id;
-    }
-
     ngOnDestroy() {
         this.socketUnSubscribeFn?.();
     }
