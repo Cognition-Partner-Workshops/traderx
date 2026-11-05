@@ -9,7 +9,7 @@ and publishes them onto a trade feed for further processing
 
 - Check out the source code from git
 - Build it with gradlew (once the code is in place)
-- ``gradlew bootRun``
+- ``python3 ../local-reference-secret.py ./gradlew bootRun``
 
 # Configuration
 
@@ -23,7 +23,7 @@ so no need to override them if you are happy with these values!
 
 Or you can also use command line arguments:
     
-   $ gradlew bootRun --args='--TRADING_SERVICE_PORT=XXXX'
+   $ python3 ../local-reference-secret.py ./gradlew bootRun --args='--TRADING_SERVICE_PORT=XXXX'
    
 The app by default runs on port `18092` and you can access the swagger on http://localhost:18092/swagger-ui.html
 

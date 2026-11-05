@@ -6,6 +6,9 @@ import finos.traderx.messaging.Publisher;
 import finos.traderx.tradeservice.controller.TradeOrderController;
 import finos.traderx.tradeservice.model.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,6 +26,20 @@ import static org.mockito.Mockito.*;
     "spring.sql.init.schema-locations=file:../database/initialSchema.sql"
 })
 class ClientRecordsTest {
+    private String previousSecret;
+
+    @BeforeEach
+    void configureTestReferenceSecret() {
+        previousSecret = System.getProperty("traderx.reference.secret");
+        System.setProperty("traderx.reference.secret", UUID.randomUUID().toString());
+    }
+
+    @AfterEach
+    void restoreReferenceSecret() {
+        if (previousSecret == null) System.clearProperty("traderx.reference.secret");
+        else System.setProperty("traderx.reference.secret", previousSecret);
+    }
+
     @MockBean Publisher<TradeOrder> tradePublisher;
     @Autowired ObjectMapper json;
     @Autowired TradeOrderController controller;

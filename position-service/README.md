@@ -39,7 +39,7 @@ How to run the application
 Check out the source code from git
 
 ```bash
-gradlew bootRun
+python3 ../local-reference-secret.py ./gradlew bootRun
 ```
 
 Configuration can be found in `application.properties` and can be overridden with env vars or command line parameters

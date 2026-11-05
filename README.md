@@ -103,7 +103,7 @@ As of writing, personal Github accounts receive 120 free core hours per month fo
 
 Once you have cloned the repository locally or once your Codespace has started, from the root traderX directory run
 ```
-docker compose up
+python3 local-reference-secret.py docker compose up
 ```
 On first run this will build all of the containers from the project specific Dockerfile's and then start them in the correct sequence.
 
@@ -154,15 +154,29 @@ gradle --settings-file .corp/settings.gradle build
 gradle --settings-file .corp/settings.gradle database:build
 
 # Run specific project
-gradle --settings-file .corp/settings.gradle account-service:bootRun
+python3 local-reference-secret.py gradle --settings-file .corp/settings.gradle account-service:bootRun
 
 ##### From inside the .corp directory ####
 cd .corp
 ./gradlew build
-./gradlew account-service:bootRun
+python3 ../local-reference-secret.py ./gradlew account-service:bootRun
 ```
 
 ## Usage (K8s)
+
+For non-Tilt deployments, provision the `traderx-reference` Kubernetes Secret in
+the deployment namespace with key `TRADERX_REFERENCE_SECRET` before applying
+the workloads. All four Java services reference that required Secret; ingress
+only proxies requests and must not receive the key. Use a stable, randomly
+generated value from your secret manager, never a committed literal.
+
+Tilt provisions the local Secret automatically. Local Compose and individual
+Gradle runs use `local-reference-secret.py`, which honors an exported
+`TRADERX_REFERENCE_SECRET` or atomically creates a private random key at
+`${XDG_STATE_HOME:-$HOME/.local/state}/traderx/reference-secret` (mode 0600).
+Python 3 is required for this local helper. The key persists across local
+restarts and separate service launches; deleting it rotates legacy trade
+references. Direct Compose usage without an exported key fails closed.
 
 The following are instructions to build and deploy all TraderX apps to your local enviroment using [tilt](https://tilt.dev) and kustomize files.
 

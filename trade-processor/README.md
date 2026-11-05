@@ -10,7 +10,7 @@ A simple application that subscribes to trade-feed pubsub engine, and 'processes
 
 - Check out the source code from git
 - change any ports needed
-- ``gradlew bootRun``
+- ``python3 ../local-reference-secret.py ./gradlew bootRun``
 
 # Configuration
 
@@ -24,7 +24,7 @@ Alternatively you can use environment variables to override certain values:
 
 Or you can use command line arguments:
     
-   $ gradlew bootRun --args='--server.port=18091'
+   $ python3 ../local-reference-secret.py ./gradlew bootRun --args='--server.port=18091'
    
 The app by default runs on port 18091
 
@@ -34,7 +34,7 @@ You can either specify `TRADE_FEED_ADDRESS` as an environment variable (should b
 
 To specify the host and the port for the TradeFeed instance to subscribe to use the `trade.feed.address` property using one of the ways describe above, like
 
-   $ gradlew bootRun --args='--trade.feed.address=http://localhost:18086
+   $ python3 ../local-reference-secret.py ./gradlew bootRun --args='--trade.feed.address=http://localhost:18086
 
 ## Database settings
 
