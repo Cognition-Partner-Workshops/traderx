@@ -1,5 +1,5 @@
 using FluentValidation.AspNetCore;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using PeopleService.Core.Infrastructure;
 using Serilog;
 using System.Reflection;
