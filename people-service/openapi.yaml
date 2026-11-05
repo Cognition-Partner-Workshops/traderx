@@ -2,7 +2,55 @@ openapi: 3.0.1
 info:
   title: PeopleService.WebApi
   version: v1
+# Every operation requires a TraderX bearer token unless it overrides this with `security: []`.
+security:
+  - bearerAuth: []
 paths:
+  /Auth/Login:
+    post:
+      tags:
+        - Auth
+      summary: Exchange directory credentials for a TraderX bearer token (public)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [logonId, password]
+              properties:
+                logonId:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Token issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  tokenType:
+                    type: string
+                    example: Bearer
+                  expiresAt:
+                    type: string
+                    format: date-time
+                  logonId:
+                    type: string
+                  fullName:
+                    type: string
+                  roles:
+                    type: array
+                    items:
+                      type: string
+        '401':
+          description: Unknown user or wrong password
   /People/GetPerson:
     get:
       tags:
@@ -83,6 +131,12 @@ paths:
         '404':
           description: The person with the specified identity was not found
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: TraderX bearer token (HS256) obtained from people-service POST /Auth/Login
   schemas:
     Person:
       type: object

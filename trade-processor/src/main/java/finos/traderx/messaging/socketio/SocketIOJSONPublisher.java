@@ -1,8 +1,13 @@
 package finos.traderx.messaging.socketio;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.socket.client.IO;
+import io.socket.client.Manager;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import org.json.JSONObject;
@@ -23,8 +28,32 @@ public abstract class SocketIOJSONPublisher<T> implements Publisher<T>, Initiali
     private static ObjectMapper objectMapper = new ObjectMapper()
             .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
+    private Supplier<String> tokenSupplier;
+
+    /**
+     * Supplies the bearer token presented to the trade-feed in the Socket.IO
+     * handshake ("auth.token"). The feed rejects connections without a valid token.
+     */
+    public void setTokenSupplier(Supplier<String> tokenSupplier) {
+        this.tokenSupplier = tokenSupplier;
+    }
+
     protected IO.Options getIOOptions() {
-        return new IO.Options();
+        IO.Options options = new IO.Options();
+        if (tokenSupplier != null) {
+            Map<String, String> auth = new HashMap<>();
+            auth.put("token", tokenSupplier.get());
+            options.auth = auth;
+        }
+        return options;
+    }
+
+    /** Refresh the handshake token before every reconnect attempt so an expired token never gets replayed. */
+    protected void refreshTokenOnReconnect(Socket socket, IO.Options options) {
+        if (tokenSupplier == null) {
+            return;
+        }
+        socket.io().on(Manager.EVENT_RECONNECT_ATTEMPT, args -> options.auth.put("token", tokenSupplier.get()));
     }
 
     org.slf4j.Logger log = LoggerFactory.getLogger(this.getClass().getName());
@@ -90,7 +119,10 @@ public abstract class SocketIOJSONPublisher<T> implements Publisher<T>, Initiali
     }
 
     protected Socket internalConnect(URI uri) throws Exception {
-        return IO.socket(uri, getIOOptions());
+        IO.Options options = getIOOptions();
+        Socket s = IO.socket(uri, options);
+        refreshTokenOnReconnect(s, options);
+        return s;
     }
 
     @Override

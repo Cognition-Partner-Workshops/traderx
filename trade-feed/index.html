@@ -44,8 +44,13 @@
         }
       });
 
-      var socket=io();
+      // The feed requires a TraderX bearer token in the handshake. Paste one obtained
+      // from people-service POST /Auth/Login (ADMIN/SERVICE tokens may watch "/*").
+      var token = new URLSearchParams(window.location.search).get('token') || window.prompt('TraderX bearer token');
+      var socket=io({ auth: { token: token } });
       const PUBLISH='publish';
+      socket.on('connect_error',(err)=>addMessage('ERROR',{message: err.message}));
+      socket.on('error',(err)=>addMessage('ERROR',err));
       const SUBSCRIBE='subscribe';
       const UNSUBSCRIBE='unsubscribe';
       socket.on(PUBLISH,(data)=>{

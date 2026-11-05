@@ -18,6 +18,11 @@ spec:
     spec:
       containers:
         - env:
+            - name: TRADERX_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: traderx-auth
+                  key: TRADERX_AUTH_SECRET
             - name: ACCOUNT_SERVICE_HOST
               value: account-service
             - name: DATABASE_TCP_HOST

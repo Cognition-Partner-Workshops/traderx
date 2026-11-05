@@ -4,7 +4,7 @@
   "description": "Simple SocketIO based publish-subscribe server",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test",
     "start": "node index.js"
   },
   "author": "",
@@ -13,6 +13,10 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "socket.io": "^4.7.5",
-    "winston": "^3.13.0"
+    "winston": "^3.13.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.7.5"
   }
 }

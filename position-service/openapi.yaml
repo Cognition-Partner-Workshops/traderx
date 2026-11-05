@@ -6,6 +6,9 @@ info:
 servers:
   - url: ''
     description: Empty URL to help proxied documentation work
+# Every operation requires a TraderX bearer token unless it overrides this with `security: []`.
+security:
+  - bearerAuth: []
 paths:
   /trades/{accountId}:
     get:
@@ -78,6 +81,12 @@ paths:
                 items:
                   $ref: '#/components/schemas/Position'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: TraderX bearer token (HS256) obtained from people-service POST /Auth/Login
   schemas:
     Trade:
       type: object

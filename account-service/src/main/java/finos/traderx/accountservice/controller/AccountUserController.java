@@ -5,14 +5,18 @@ import java.util.List;
 import finos.traderx.accountservice.exceptions.ResourceNotFoundException;
 import finos.traderx.accountservice.model.AccountUser;
 import finos.traderx.accountservice.model.Person;
+import finos.traderx.accountservice.security.BearerTokenPropagatingInterceptor;
 import finos.traderx.accountservice.service.AccountUserService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,11 +32,14 @@ import org.springframework.web.client.RestTemplate;
 @CrossOrigin("*")
 @RestController
 @RequestMapping(value="/accountuser", produces="application/json")
+@PreAuthorize("hasRole('ADMIN')")
 public class AccountUserController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AccountUserController.class);
 
-	private RestTemplate restTemplate = new RestTemplate();
+	private RestTemplate restTemplate = new RestTemplateBuilder()
+			.additionalInterceptors(new BearerTokenPropagatingInterceptor())
+			.build();
 
 	@Autowired
 	AccountUserService accountUserService;
@@ -89,6 +96,11 @@ public class AccountUserController {
 	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<String> resourceNotFoundExceptionMapper(ResourceNotFoundException e) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+	}
+
+	@ExceptionHandler(AccessDeniedException.class)
+	public ResponseEntity<String> accessDenied(AccessDeniedException e) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Caller is not permitted to access this resource");
 	}
 
 	@ExceptionHandler(Exception.class)

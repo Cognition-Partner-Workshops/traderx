@@ -19,6 +19,11 @@ spec:
       containers:
         - name: position-service
           env:
+            - name: TRADERX_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: traderx-auth
+                  key: TRADERX_AUTH_SECRET
             - name: DATABASE_TCP_HOST
               value: database
             - name: POSITION_SERVICE_PORT

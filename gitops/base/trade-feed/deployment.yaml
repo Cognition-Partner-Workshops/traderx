@@ -21,6 +21,13 @@ spec:
           imagePullPolicy: IfNotPresent
           name: trade-feed
           env:
+            - name: TRADERX_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: traderx-auth
+                  key: TRADERX_AUTH_SECRET
+            - name: ACCOUNT_SERVICE_URL
+              value: http://account-service:8080
             - name: TRADE_FEED_PORT
               value: "18086"
           ports:

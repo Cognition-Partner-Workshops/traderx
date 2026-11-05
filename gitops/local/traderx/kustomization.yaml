@@ -14,3 +14,12 @@ resources:
  - ../../base/trade-processor
  - ../../base/trade-service
  - ../../base/web-front-end 
+
+# Shared TraderX auth material. Copy traderx-auth.env.example to traderx-auth.env
+# (git-ignored) and fill in real values before applying.
+secretGenerator:
+  - name: traderx-auth
+    envs:
+      - traderx-auth.env
+generatorOptions:
+  disableNameSuffixHash: true

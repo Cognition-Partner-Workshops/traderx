@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PeopleService.Core.DirectoryService;
 using PeopleService.Core.Queries;
@@ -6,6 +7,7 @@ using PeopleService.Core.Queries;
 namespace PeopleService.WebApi.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("[controller]")]
     public class PeopleController : ControllerBase
     {

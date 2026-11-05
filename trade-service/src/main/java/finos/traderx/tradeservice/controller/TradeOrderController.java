@@ -4,8 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +24,7 @@ import finos.traderx.tradeservice.exceptions.ResourceNotFoundException;
 import finos.traderx.tradeservice.model.Account;
 import finos.traderx.tradeservice.model.Security;
 import finos.traderx.tradeservice.model.TradeOrder;
+import finos.traderx.tradeservice.security.BearerTokenPropagatingInterceptor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -32,7 +38,10 @@ public class TradeOrderController {
 	@Autowired
 	private Publisher<TradeOrder> tradePublisher;
 	
-	private RestTemplate restTemplate = new RestTemplate();
+	/** Downstream calls carry the caller's own bearer token so account-service can enforce ownership. */
+	private RestTemplate restTemplate = new RestTemplateBuilder()
+			.additionalInterceptors(new BearerTokenPropagatingInterceptor())
+			.build();
 
 	@Value("${reference.data.service.url}")
 	private String referenceDataServiceAddress;
@@ -42,8 +51,9 @@ public class TradeOrderController {
 
 	@Operation(description = "Submit a new trade order")
 	@PostMapping("/")
-	public ResponseEntity<TradeOrder> createTradeOrder(@Parameter(description = "the intendeded trade order") @RequestBody TradeOrder tradeOrder) {
-		log.info("Called createTradeOrder");
+	public ResponseEntity<TradeOrder> createTradeOrder(@Parameter(description = "the intendeded trade order") @RequestBody TradeOrder tradeOrder,
+			Authentication authentication) {
+		log.info("Called createTradeOrder by {}", authentication.getName());
 		
 		if (!validateTicker(tradeOrder.getSecurity())) 
 		{
@@ -65,6 +75,11 @@ public class TradeOrderController {
 		}
 	}
 
+	@ExceptionHandler(AccessDeniedException.class)
+	public ResponseEntity<String> accessDenied(AccessDeniedException e) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+	}
+
 	private boolean validateTicker(String ticker)
 	{
 		// Move whole method to a sperate class that handles all reference data 
@@ -78,7 +93,7 @@ public class TradeOrderController {
 			return true;
 		}
 		catch (HttpClientErrorException ex) {
-			if (ex.getRawStatusCode() == 404) {
+			if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
 				log.info(ticker + " not found in reference data service.");
 			}
 			else {
@@ -103,7 +118,10 @@ public class TradeOrderController {
 				return true;
 		}
 		catch (HttpClientErrorException ex) {
-			if (ex.getRawStatusCode() == 404) {
+			if (ex.getStatusCode() == HttpStatus.FORBIDDEN) {
+				throw new AccessDeniedException("Caller does not own account " + id);
+			}
+			if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
 				log.info("Account" + id + " not found in account service.");				
 			}
 			else {
