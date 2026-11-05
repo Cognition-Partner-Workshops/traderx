@@ -23,9 +23,9 @@ public class AccountUser implements Serializable {
 	Integer accountId;
 
 	@Id
-	@Column(name = "Username")
+	@Column(name = "Username", length = 15)
 	@NotBlank
-	@Pattern(regexp = "^[A-Za-z0-9][A-Za-z0-9._-]{0,49}$")
+	@Pattern(regexp = "^[A-Za-z0-9][A-Za-z0-9._-]{0,14}$")
 	String username;
 
 	public String getUsername() {

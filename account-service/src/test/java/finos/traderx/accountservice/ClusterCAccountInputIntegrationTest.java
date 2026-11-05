@@ -112,6 +112,30 @@ class ClusterCAccountInputIntegrationTest {
     }
 
     @Test
+    void sixteenCharacterUsernameRejectedWithoutPeopleLookup() throws Exception {
+        String body = "{\"accountId\":" + existing.getId() + ",\"username\":\"abcdefghijklmnop\"}";
+        for (var request : new org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder[]{
+                post("/accountuser/"), put("/accountuser/")}) {
+            mvc.perform(request.contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest()).andExpect(content().string("Invalid request"));
+        }
+        people.verify();
+        assertEquals(0, users.count());
+    }
+
+    @Test
+    void fifteenCharacterUsernameAccepted() throws Exception {
+        String username = "abcdefghijklmno";
+        people.expect(requestTo("http://people.test/People/GetPerson?LogonId=" + username))
+            .andRespond(withSuccess("{\"logonId\":\"" + username + "\"}", MediaType.APPLICATION_JSON));
+        mvc.perform(post("/accountuser/").contentType(MediaType.APPLICATION_JSON)
+            .content("{\"accountId\":" + existing.getId() + ",\"username\":\"" + username + "\"}"))
+            .andExpect(status().isOk());
+        people.verify();
+        assertEquals(username, users.findAll().iterator().next().getUsername());
+    }
+
+    @Test
     void validPostUsesExactPeopleUri() throws Exception {
         foundPerson();
         mvc.perform(post("/accountuser/").contentType(MediaType.APPLICATION_JSON).content(mapping()))
