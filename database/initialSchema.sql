@@ -1,3 +1,5 @@
+Drop Table TradeStateHistory IF EXISTS;
+
 Drop Table Trades IF EXISTS;
 
 Drop Table AccountUsers IF EXISTS; 
@@ -21,6 +23,11 @@ Alter Table Positions ADD FOREIGN KEY (AccountID) References Accounts(ID) ;
 CREATE TABLE Trades ( ID Varchar (50) Primary Key, AccountID INTEGER, Created TIMESTAMP, Updated TIMESTAMP, Security VARCHAR (15) ,  Side VARCHAR(10) check (Side in ('Buy','Sell')),  Quantity INTEGER check Quantity > 0 , State VARCHAR(20) check (State in ('New', 'Processing', 'Settled', 'Cancelled'))) ;  
 
 Alter Table Trades Add Foreign Key (AccountID) references Accounts(ID); 
+
+--- Append-only history of every trade state change, stamped in UTC. The current State on Trades is a convenience; this table is the record. ---
+CREATE TABLE TradeStateHistory ( ID BIGINT AUTO_INCREMENT PRIMARY KEY, TradeID VARCHAR(100) NOT NULL, State VARCHAR(20) NOT NULL check (State in ('New', 'Processing', 'Settled', 'Cancelled')), ChangedAt TIMESTAMP(6) WITH TIME ZONE NOT NULL ) ;
+
+Alter Table TradeStateHistory Add Foreign Key (TradeID) references Trades(ID); 
 
 CREATE SEQUENCE ACCOUNTS_SEQ start with 65000 INCREMENT BY 1;
 
@@ -65,6 +72,11 @@ INSERT into Positions (AccountID, Security, Updated, Quantity) VALUES(22214, 'MS
 INSERT into Positions (AccountID, Security, Updated, Quantity) VALUES(22214, 'IBM',NOW(), -100); 
 INSERT into Positions (AccountID, Security, Updated, Quantity) VALUES(22214, 'C',NOW(), -2000); 
 
+INSERT into TradeStateHistory (TradeID, State, ChangedAt) VALUES('TRADE-22214-AABBCC', 'Settled', CURRENT_TIMESTAMP(6)); 
+INSERT into TradeStateHistory (TradeID, State, ChangedAt) VALUES('TRADE-22214-DDEEFF', 'Settled', CURRENT_TIMESTAMP(6)); 
+INSERT into TradeStateHistory (TradeID, State, ChangedAt) VALUES('TRADE-22214-GGHHII', 'Settled', CURRENT_TIMESTAMP(6)); 
+
 
 INSERT into Trades(ID, Created, Updated, Security, Side, Quantity, State, AccountID) VALUES('TRADE-52355-AABBCC', NOW(), NOW(), 'BAC', 'Sell', 2400, 'Settled', 52355); 
 INSERT into Positions (AccountID, Security, Updated, Quantity) VALUES(52355, 'BAC',NOW(), -2400); 
+INSERT into TradeStateHistory (TradeID, State, ChangedAt) VALUES('TRADE-52355-AABBCC', 'Settled', CURRENT_TIMESTAMP(6)); 
