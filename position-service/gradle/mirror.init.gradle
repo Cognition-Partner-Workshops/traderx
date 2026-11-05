@@ -1,0 +1,12 @@
+beforeSettings { settings ->
+    settings.pluginManagement.repositories {
+        maven { url 'https://maven-central.storage-download.googleapis.com/maven2/' }
+        gradlePluginPortal()
+    }
+}
+settingsEvaluated { settings ->
+    settings.dependencyResolutionManagement.repositories {
+        clear()
+        maven { url 'https://maven-central.storage-download.googleapis.com/maven2/' }
+    }
+}
