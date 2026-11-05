@@ -3,6 +3,9 @@ package finos.traderx.positionservice;
 import finos.traderx.positionservice.controller.TradeController;
 import finos.traderx.positionservice.controller.PositionController;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +22,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class ClientRecordsTest {
+    private String previousSecret;
+
+    @BeforeEach
+    void configureTestReferenceSecret() {
+        previousSecret = System.getProperty("traderx.reference.secret");
+        System.setProperty("traderx.reference.secret", UUID.randomUUID().toString());
+    }
+
+    @AfterEach
+    void restoreReferenceSecret() {
+        if (previousSecret == null) System.clearProperty("traderx.reference.secret");
+        else System.setProperty("traderx.reference.secret", previousSecret);
+    }
+
     @Autowired MockMvc http;
 
     @Test

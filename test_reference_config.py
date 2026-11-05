@@ -98,6 +98,11 @@ class ReferenceConfigTest(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("outside the checkout", result.stderr)
 
+    def test_java_images_include_the_schema_used_by_their_build_tests(self):
+        for service in SERVICES:
+            dockerfile = (ROOT / service / "Dockerfile").read_text()
+            self.assertIn("COPY database/initialSchema.sql /database/initialSchema.sql", dockerfile)
+
 
 if __name__ == "__main__":
     unittest.main()
