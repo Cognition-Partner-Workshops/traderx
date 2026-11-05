@@ -64,6 +64,7 @@ export DATABASE_PG_PORT=18083
 export DATABASE_WEB_PORT=18084
 export REFERENCE_DATA_SERVICE_PORT=18085
 export TRADE_FEED_PORT=18086
+export TRADE_FEED_PUBLISH_TOKEN='<choose-a-random-secret>'
 export ACCOUNT_SERVICE_PORT=18088
 export PEOPLE_SERVICE_PORT=18089
 export POSITION_SERVICE_PORT=18090
@@ -72,6 +73,8 @@ export TRADING_SERVICE_PORT=18092
 export WEB_SERVICE_ANGULAR_PORT=18093  #Angular
 export WEB_SERVICE_REACT_PORT=18094  #React
 ```
+
+Trade-feed, trade-service and trade-processor must use the same `TRADE_FEED_PUBLISH_TOKEN` value.
 
 The recommended starting sequence to let everything find what it needs is:
 

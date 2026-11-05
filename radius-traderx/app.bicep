@@ -2,6 +2,8 @@ extension radius
 
 // Parameters
 param application string
+@secure()
+param tradeFeedPublishToken string
 
 resource database 'Applications.Core/containers@2023-10-01-preview' = {
   name: 'database'
@@ -45,6 +47,11 @@ resource tradefeed 'Applications.Core/containers@2023-10-01-preview' = {
     application: application
     container: {
       image: 'ghcr.io/finos/traderx/trade-feed:latest'
+      env: {
+        TRADE_FEED_PUBLISH_TOKEN: {
+          value: tradeFeedPublishToken
+        }
+      }
       ports: {
         web: {
           containerPort: 18086
@@ -152,6 +159,9 @@ resource tradeservice 'Applications.Core/containers@2023-10-01-preview' = {
         TRADE_FEED_HOST: {
           value: tradefeed.name
         }
+        TRADE_FEED_PUBLISH_TOKEN: {
+          value: tradeFeedPublishToken
+        }
       }
     }
     connections: {
@@ -191,6 +201,9 @@ resource tradeprocessor 'Applications.Core/containers@2023-10-01-preview' = {
         }
         TRADE_FEED_HOST: {
           value: tradefeed.name
+        }
+        TRADE_FEED_PUBLISH_TOKEN: {
+          value: tradeFeedPublishToken
         }
       }
     }

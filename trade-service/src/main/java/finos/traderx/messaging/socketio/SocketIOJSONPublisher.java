@@ -1,6 +1,7 @@
 package finos.traderx.messaging.socketio;
 
 import java.net.URI;
+import java.util.Map;
 
 import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
@@ -25,8 +26,18 @@ public abstract class SocketIOJSONPublisher<T> implements Publisher<T>, Initiali
     private static ObjectMapper objectMapper = new ObjectMapper()
             .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
+    private String publishToken;
+
+    public void setPublishToken(String token) {
+        publishToken = token;
+    }
+
     protected IO.Options getIOOptions() {
-        return new IO.Options();
+        IO.Options options = new IO.Options();
+        if (publishToken != null && !publishToken.isEmpty()) {
+            options.auth = Map.of("token", publishToken);
+        }
+        return options;
     }
 
     org.slf4j.Logger log = LoggerFactory.getLogger(this.getClass().getName());
