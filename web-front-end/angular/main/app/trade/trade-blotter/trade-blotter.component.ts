@@ -35,6 +35,10 @@ export class TradeBlotterComponent implements OnChanges, OnDestroy {
             headerName: 'STATE',
             field: 'state',
             enableCellChangeFlash: true
+        },
+        {
+            headerName: 'SETTLEMENT DATE',
+            field: 'settlementDate'
         }
     ];
 
@@ -77,11 +81,11 @@ export class TradeBlotterComponent implements OnChanges, OnDestroy {
     }
 
     private update(data: Trade) {
-        const row = this.gridApi.getRowNode(data.id);
+        const row = this.gridApi.getRowNode(`Trade-${data.id}`);
         let tradeData;
         if (row) {
             tradeData = {
-                update: [Object.assign(row.data, { state: data.state })]
+                update: [Object.assign({}, row.data, data)]
             };
         } else {
             tradeData = {
@@ -93,6 +97,7 @@ export class TradeBlotterComponent implements OnChanges, OnDestroy {
                     security: data.security,
                     side: data.side,
                     state: data.state,
+                    settlementDate: data.settlementDate,
                     updated: data.updated
                 }],
                 addIndex: 0

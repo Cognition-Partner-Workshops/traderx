@@ -98,6 +98,11 @@ components:
         state:
           type: string
           example: 'New'
+        settlementDate:
+          type: string
+          format: date
+          description: Stored settlement date assigned at booking by the trade processor
+          example: '2026-11-09'
         quantity:
           type: integer
           format: int32

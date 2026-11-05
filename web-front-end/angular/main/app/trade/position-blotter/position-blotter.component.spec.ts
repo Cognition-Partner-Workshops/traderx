@@ -50,4 +50,16 @@ describe('PositionBlotterComponent', () => {
     expect(firstRow.children[1].innerText).toEqual(component.positions[0].quantity.toString());
   });
 
+  it('updates the existing position row instead of adding a duplicate', () => {
+    const existing = { ...positions[0] };
+    const getRowNode = jasmine.createSpy().and.returnValue({ data: existing });
+    const applyTransaction = jasmine.createSpy();
+    component.gridApi = { getRowNode, applyTransaction } as any;
+    component.update({ ...existing, quantity: existing.quantity + 10 });
+    expect(getRowNode).toHaveBeenCalledWith(`Position-${existing.security}`);
+    const transaction = applyTransaction.calls.mostRecent().args[0];
+    expect(transaction.add).toBeUndefined();
+    expect(transaction.update[0].quantity).toEqual(positions[0].quantity + 10);
+  });
+
 });

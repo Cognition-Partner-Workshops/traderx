@@ -1,18 +1,17 @@
 package finos.traderx.tradeprocessor.service;
 
-import java.util.ArrayList;
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.transaction.annotation.Transactional;
 
-import finos.traderx.messaging.PubSubException;
-import finos.traderx.messaging.Publisher;
 import finos.traderx.tradeprocessor.model.*;
 import finos.traderx.tradeprocessor.repository.*;
 
@@ -26,12 +25,13 @@ public class TradeService {
 	PositionRepository positionRepository;
 
 	
-    @Autowired 
-    private Publisher<Trade> tradePublisher;
-    
     @Autowired
-    private Publisher<Position> positionPublisher;
+    private Clock settlementClock;
+
+    @Autowired
+    private ApplicationEventPublisher events;
     
+	@Transactional
 	public TradeBookingResult processTrade(TradeOrder order) {
 		log.info("Trade order received : "+order);
         Trade t=new Trade();
@@ -41,12 +41,14 @@ public class TradeService {
 		t.setId(UUID.randomUUID().toString());
 
 
-        t.setCreated(new Date());
-        t.setUpdated(new Date());
+        Date now = Date.from(settlementClock.instant());
+        t.setCreated(now);
+        t.setUpdated(now);
+        t.setSettlementDate(SettlementCalendar.settlementDate(now.toInstant().atZone(settlementClock.getZone()).toLocalDate()));
         t.setSecurity(order.getSecurity());
         t.setSide(order.getSide());
         t.setQuantity(order.getQuantity());
-		t.setState(TradeState.New);
+		t.setState(TradeState.Processing);
 		Position position=positionRepository.findByAccountIdAndSecurity(order.getAccountId(), order.getSecurity());
 		log.info("Position for "+order.getAccountId()+" "+order.getSecurity()+" is "+position);
 		if(position==null) {
@@ -59,29 +61,27 @@ public class TradeService {
 		int newQuantity=((order.getSide()==TradeSide.Buy)?1:-1)*t.getQuantity();
 		position.setQuantity(position.getQuantity()+newQuantity);
 		log.info("Trade {}",t);
+		position.setUpdated(now);
 		tradeRepository.save(t);
 		positionRepository.save(position);
-		// Simulate the handling of this trade...
-		// Now mark as processing
-		t.setUpdated(new Date());
-		t.setState(TradeState.Processing);
-		// Now mark as settled
-		t.setUpdated(new Date());
-		t.setState(TradeState.Settled);
-		tradeRepository.save(t);
 		
 
 		TradeBookingResult result=new TradeBookingResult(t, position);
 		log.info("Trade Processing complete : "+result);
-		try{
-			log.info("Publishing : "+result);
-			tradePublisher.publish("/accounts/"+order.getAccountId()+"/trades", result.getTrade());
-			positionPublisher.publish("/accounts/"+order.getAccountId()+"/positions", result.getPosition());
-		} catch (PubSubException exc){
-			log.error("Error publishing trade "+order,exc);
-		}
+		events.publishEvent(result);
 		
 		return result;	
 	}
+
+    @Transactional
+    public void settleDueTrades() {
+        LocalDate today = LocalDate.now(settlementClock);
+        for (Trade trade : tradeRepository.findByStateAndSettlementDateLessThanEqual(TradeState.Processing, today)) {
+            trade.setState(TradeState.Settled);
+            trade.setUpdated(Date.from(settlementClock.instant()));
+            tradeRepository.save(trade);
+            events.publishEvent(new TradeBookingResult(trade, null));
+        }
+    }
 
 }
