@@ -43,6 +43,9 @@ public class TradeOrderController {
 	@Operation(description = "Submit a new trade order")
 	@PostMapping("/")
 	public ResponseEntity<TradeOrder> createTradeOrder(@Parameter(description = "the intendeded trade order") @RequestBody TradeOrder tradeOrder) {
+		if (tradeOrder == null || !tradeOrder.hasValidInput()) {
+			return ResponseEntity.badRequest().build();
+		}
 		log.info("Called createTradeOrder");
 		
 		if (!validateTicker(tradeOrder.getSecurity())) 
