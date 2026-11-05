@@ -21,6 +21,11 @@ spec:
           env:
             - name: DATABASE_TCP_HOST
               value: database
+            - name: DATABASE_DBPASS
+              valueFrom:
+                secretKeyRef:
+                  name: traderx-database
+                  key: password
             - name: POSITION_SERVICE_PORT
               value: "18090"
           image: traderx/position-service

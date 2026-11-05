@@ -17,13 +17,6 @@ spec:
               name: account-service
               port:
                 number: 8080
-        - path: /db-web(/|$)(.*)
-          pathType: Prefix
-          backend:
-            service:
-              name: database
-              port:
-                number: 18084
         - path: /ng-cli-ws
           pathType: Prefix
           backend:

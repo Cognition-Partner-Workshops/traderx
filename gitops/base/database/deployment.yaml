@@ -21,7 +21,9 @@ spec:
         ports:
           - containerPort: 18082
             protocol: TCP
-          - containerPort: 18083
-            protocol: TCP
-          - containerPort: 18084
-            protocol: TCP
+        env:
+          - name: DATABASE_DBPASS
+            valueFrom:
+              secretKeyRef:
+                name: traderx-database
+                key: password

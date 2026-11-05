@@ -23,6 +23,11 @@ spec:
               value: "18088"
             - name: DATABASE_TCP_HOST
               value: database
+            - name: DATABASE_DBPASS
+              valueFrom:
+                secretKeyRef:
+                  name: traderx-database
+                  key: password
           image: traderx/account-service
           imagePullPolicy: IfNotPresent
           ports:

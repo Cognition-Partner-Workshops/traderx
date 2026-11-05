@@ -23,5 +23,10 @@ spec:
         env:
         - name: DATABASE_TCP_HOST
           value: database
+        - name: DATABASE_DBPASS
+          valueFrom:
+            secretKeyRef:
+              name: traderx-database
+              key: password
         - name: TRADE_FEED_HOST
           value: trade-feed

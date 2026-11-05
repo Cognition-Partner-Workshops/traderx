@@ -18,17 +18,19 @@ rad init
 
 >Select `Yes` when prompted to setup an application in the current directory
 
+The database requires an operator-chosen password (`DATABASE_DBPASS`, see `database/README.md`); pass it as the secure `databasePassword` parameter.
+
 To deploy and run the app in your local environment:
 ```bash
-rad run traderx.bicep
+rad run traderx.bicep --parameters databasePassword="$DATABASE_DBPASS"
 ```
 
 If you have an Azure environment set up, you can deploy the app there as well (in this example the Azure environment is associated with the `prod-azure` workspace):
 ```bash
-rad deploy traderx.bicep -w prod-azure
+rad deploy traderx.bicep -w prod-azure --parameters databasePassword="$DATABASE_DBPASS"
 ```
 
 If you have an AWS environment set up, you can deploy the app there as well (in this example the AWS environment is associated with the `prod-aws` workspace):
 ```bash
-rad deploy traderx.bicep -w prod-aws
+rad deploy traderx.bicep -w prod-aws --parameters databasePassword="$DATABASE_DBPASS"
 ```
