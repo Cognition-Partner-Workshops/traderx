@@ -76,7 +76,7 @@ public class AccountUserController {
 			return true;
 		}
 		catch (HttpClientErrorException ex) {
-			if (ex.getRawStatusCode() == 404) {
+			if (ex.getStatusCode().value() == 404) {
 				logger.info(username + " not found in People service.");
 			}
 			else {
