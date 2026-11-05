@@ -21,6 +21,8 @@ so no need to override them if you are happy with these values!
    $ export REFERENCE_DATA_SERVICE_URL=http://HOSTPORT
    $ export TRADE_FEED_ADDRESS=HOSTPORT
 
+Set `TRADE_FEED_PUBLISH_TOKEN` to the same shared secret configured on trade-feed.
+
 Or you can also use command line arguments:
     
    $ gradlew bootRun --args='--TRADING_SERVICE_PORT=XXXX'
