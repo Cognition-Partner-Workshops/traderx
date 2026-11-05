@@ -6,6 +6,7 @@ import { createAccount, sleep } from 'main/app/test-utils/utils';
 import { AgGridModule } from 'ag-grid-angular';
 import { ButtonCellRendererComponent } from './button-renderer.component';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { of } from 'rxjs';
 
 describe('Account tests', () => {
   let comp: AccountComponent;
@@ -82,6 +83,21 @@ describe('Account tests', () => {
 
     expect((<any>comp).accountService.getAccountUsers).toHaveBeenCalled();
     expect(element.querySelectorAll('#usergrid .ag-center-cols-container .ag-row').length).toBe(1);
+  });
+
+  it('should show only the last four digits of account numbers in the account list', async () => {
+    spyOn((<any>comp).accountService, 'getAccounts').and.returnValue(of([{ id: 22214, displayName: 'Test Account 20' }]));
+    comp.ngOnInit();
+    await sleep(250);
+    fixture.detectChanges();
+    const cell = element.querySelector('#accountgrid .ag-center-cols-container .ag-row [col-id="id"]') as HTMLElement;
+    expect(cell.textContent?.trim()).toBe('****2214');
+    expect(element.querySelector('#accountgrid')?.textContent).not.toContain('22214');
+  });
+
+  it('should show only the last four digits of account numbers in the users list', () => {
+    const accountIdColumn = comp.columnDefsUser.find((col) => col.field === 'accountId') as any;
+    expect(accountIdColumn.valueFormatter({ value: 22214 })).toBe('****2214');
   });
 
   it('should set account on update callback', () => {

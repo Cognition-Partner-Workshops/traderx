@@ -25,6 +25,9 @@ public class TradeService {
 	@Autowired
 	PositionRepository positionRepository;
 
+	@Autowired
+	TradeStatusHistoryRepository tradeStatusHistoryRepository;
+
 	
     @Autowired 
     private Publisher<Trade> tradePublisher;
@@ -59,16 +62,13 @@ public class TradeService {
 		int newQuantity=((order.getSide()==TradeSide.Buy)?1:-1)*t.getQuantity();
 		position.setQuantity(position.getQuantity()+newQuantity);
 		log.info("Trade {}",t);
-		tradeRepository.save(t);
+		saveWithStatusHistory(t);
 		positionRepository.save(position);
 		// Simulate the handling of this trade...
 		// Now mark as processing
-		t.setUpdated(new Date());
-		t.setState(TradeState.Processing);
+		changeState(t, TradeState.Processing);
 		// Now mark as settled
-		t.setUpdated(new Date());
-		t.setState(TradeState.Settled);
-		tradeRepository.save(t);
+		changeState(t, TradeState.Settled);
 		
 
 		TradeBookingResult result=new TradeBookingResult(t, position);
@@ -82,6 +82,17 @@ public class TradeService {
 		}
 		
 		return result;	
+	}
+
+	private void changeState(Trade t, TradeState state) {
+		t.setUpdated(new Date());
+		t.setState(state);
+		saveWithStatusHistory(t);
+	}
+
+	private void saveWithStatusHistory(Trade t) {
+		tradeRepository.save(t);
+		tradeStatusHistoryRepository.save(new TradeStatusHistory(t.getId(), t.getState(), t.getUpdated().toInstant()));
 	}
 
 }

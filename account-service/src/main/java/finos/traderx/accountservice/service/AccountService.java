@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import finos.traderx.accountservice.exceptions.ResourceNotFoundException;
 import finos.traderx.accountservice.model.Account;
+import finos.traderx.accountservice.model.AccountNumberMask;
 import finos.traderx.accountservice.repository.AccountRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class AccountService {
 	public Account getAccountById(int id) throws ResourceNotFoundException {
 		Optional<Account> account = this.accountRepository.findById(id);
 		if (account.isEmpty()) {
-			throw new ResourceNotFoundException("Account with id " + id + "not found");
+			throw new ResourceNotFoundException("Account with id " + AccountNumberMask.mask(id) + " not found");
 		}
 		return account.get();
 	}
