@@ -1,0 +1,12 @@
+node_modules
+dist
+build
+.gradle
+**/bin
+**/obj
+.git
+*.log
+coverage
+_data
+.env
+.env.*

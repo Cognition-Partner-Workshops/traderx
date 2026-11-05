@@ -1,4 +1,5 @@
-FROM nginx
+FROM nginxinc/nginx-unprivileged:1.27.5-alpine
+USER root
 
 EXPOSE 8080
 ARG NGINX_HOST="localhost"
@@ -11,3 +12,5 @@ ENV DOLLAR=$DOLLAR
 COPY nginx.traderx.conf.template /etc/nginx/conf.d/nginx.traderx.conf.template
 
 RUN envsubst < /etc/nginx/conf.d/nginx.traderx.conf.template > /etc/nginx/conf.d/default.conf
+
+USER 101

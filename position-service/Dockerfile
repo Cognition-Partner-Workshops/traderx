@@ -1,13 +1,13 @@
-# See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/java/.devcontainer/base.Dockerfile
-
-# [Choice] Java version (use -bullseye variants on local arm64/Apple Silicon): 11, 17, 11-bullseye, 17-bullseye, 11-buster, 17-buster
-ARG VARIANT="21"
-FROM mcr.microsoft.com/vscode/devcontainers/java:1-${VARIANT}
-
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /position-service
 COPY . .
+RUN --mount=type=secret,id=gradle_init,target=/root/.gradle/init.d/mirror.gradle,required=false ./gradlew --no-daemon bootJar \
+    && find build/libs -name '*.jar' ! -name '*-plain.jar' -exec cp {} app.jar \;
 
+FROM eclipse-temurin:21-jre
+WORKDIR /position-service
+RUN groupadd --gid 10001 app && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin app
+COPY --from=build --chown=10001:10001 /position-service/app.jar ./app.jar
 EXPOSE 18090
-
-RUN ./gradlew build
-ENTRYPOINT ./gradlew bootRun
+USER 10001
+ENTRYPOINT ["java","-jar","/position-service/app.jar"]
