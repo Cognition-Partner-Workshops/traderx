@@ -86,6 +86,10 @@ class DeploymentHardening(unittest.TestCase):
         c = self.deps["database-deployment"]["spec"]["template"]["spec"]["containers"][0]
         self.assertIn("/database/_data", {m["mountPath"] for m in c["volumeMounts"]})
 
+    def test_people_service_log_dir_writable(self):
+        c = self.deps["people-service"]["spec"]["template"]["spec"]["containers"][0]
+        self.assertIn("/people-service/PeopleService.WebApi/Logs", {m["mountPath"] for m in c["volumeMounts"]})
+
     def test_f2_resources(self):
         for name, d in self.deps.items():
             for c in d["spec"]["template"]["spec"]["containers"]:

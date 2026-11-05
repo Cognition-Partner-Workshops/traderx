@@ -29,6 +29,9 @@ spec:
         - name: tmp
           emptyDir:
             sizeLimit: 256Mi
+        - name: logs
+          emptyDir:
+            sizeLimit: 256Mi
       containers:
         - name: people-service
           image: traderx/people-service
@@ -64,6 +67,9 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+            # Serilog RollingFile("Logs/PeopleService.log"), relative to the Dockerfile's PeopleService.WebApi cwd
+            - name: logs
+              mountPath: /people-service/PeopleService.WebApi/Logs
           ports:
             - containerPort: 18089
               protocol: TCP
