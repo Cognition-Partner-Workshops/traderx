@@ -67,7 +67,7 @@ public abstract class SocketIOJSONPublisher<T> implements Publisher<T>, Initiali
             log.debug("Publishing message");
             socket.emit("publish", obj);
         } catch (Exception x) {
-            x.printStackTrace();
+            log.error("Error publishing message: {}", finos.traderx.logging.SafeLog.exception(x));
         }
     }
 
