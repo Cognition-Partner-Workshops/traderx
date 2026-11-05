@@ -9,5 +9,9 @@ spec:
     - name: "18089"
       port: 8080
       targetPort: 18089
+    # Same-port alias: callers use http://people-service:18089 (see *_SERVICE_HOST / TRADE_FEED_HOST).
+    - name: internal
+      port: 18089
+      targetPort: 18089
   selector:
     app: people-service
