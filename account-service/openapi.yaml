@@ -2,6 +2,9 @@ openapi: 3.0.1
 info:
   title: "Account Service - TraderX"
   version: "1.0"
+# Every operation requires a TraderX bearer token unless it overrides this with `security: []`.
+security:
+  - bearerAuth: []
 paths:
   /accountuser/:
     get:
@@ -145,6 +148,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/Account"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: TraderX bearer token (HS256) obtained from people-service POST /Auth/Login
   schemas:
     AccountList:
       type: array

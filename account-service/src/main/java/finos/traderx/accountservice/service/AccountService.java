@@ -7,6 +7,7 @@ import java.util.Optional;
 import finos.traderx.accountservice.exceptions.ResourceNotFoundException;
 import finos.traderx.accountservice.model.Account;
 import finos.traderx.accountservice.repository.AccountRepository;
+import finos.traderx.accountservice.repository.AccountUserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,21 @@ public class AccountService {
 	@Autowired
 	AccountRepository accountRepository;
 
+	@Autowired
+	AccountUserRepository accountUserRepository;
+
 	public List<Account> getAllAccount() {
 		List<Account> accounts = new ArrayList<Account>();
 		this.accountRepository.findAll().forEach(account -> accounts.add(account));
+		return accounts;
+	}
+
+	public List<Account> getAccountsForUser(String username) {
+		List<Integer> accountIds = this.accountUserRepository.findByUsername(username).stream()
+			.map(accountUser -> accountUser.getAccountId())
+			.toList();
+		List<Account> accounts = new ArrayList<Account>();
+		this.accountRepository.findAllById(accountIds).forEach(account -> accounts.add(account));
 		return accounts;
 	}
 

@@ -4,6 +4,9 @@ info:
   description: The Reference Data API description
   version: '1.0'
   contact: {}
+# Every operation requires a TraderX bearer token unless it overrides this with `security: []`.
+security:
+  - bearerAuth: []
 paths:
   /stocks:
     get:
@@ -45,6 +48,12 @@ paths:
                 $ref: '#/components/schemas/Security'
 tags: []
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: TraderX bearer token (HS256) obtained from people-service POST /Auth/Login
   schemas:
     Security:
       type: object

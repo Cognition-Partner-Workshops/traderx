@@ -1,5 +1,11 @@
 version: '3.4'
 
+# Only the ingress (8080) is published to the host. Every backend service and the
+# database are reachable solely on the internal network, and every service validates
+# TraderX bearer tokens signed with TRADERX_AUTH_SECRET (see .env.example).
+x-auth-env: &auth-env
+  TRADERX_AUTH_SECRET: ${TRADERX_AUTH_SECRET:?TRADERX_AUTH_SECRET must be set (>= 32 chars)}
+
 services:
   database:
     restart: always
@@ -14,10 +20,6 @@ services:
       - 18082
       - 18083
       - 18084
-    ports:
-      - 18082:18082
-      - 18083:18083
-      - 18084:18084
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
@@ -33,8 +35,8 @@ services:
     working_dir: /reference-data
     expose:
       - 18085
-    ports:
-      - 18085:18085
+    environment:
+      <<: *auth-env
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
@@ -50,8 +52,9 @@ services:
     working_dir: /trade-feed
     expose:
       - 18086
-    ports:
-      - 18086:18086
+    environment:
+      <<: *auth-env
+      ACCOUNT_SERVICE_URL: http://account-service:18088
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
@@ -67,8 +70,10 @@ services:
     working_dir: /people-service
     expose:
       - 18089
-    ports:
-      - 18089:18089
+    environment:
+      <<: *auth-env
+      TRADERX_DEMO_USER_PASSWORD: ${TRADERX_DEMO_USER_PASSWORD:?TRADERX_DEMO_USER_PASSWORD must be set}
+      TRADERX_ADMIN_USERS: ${TRADERX_ADMIN_USERS:-}
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
@@ -84,11 +89,10 @@ services:
     working_dir: /account-service
     expose:
       - 18088
-    ports:
-      - 18088:18088
     environment:
-      - DATABASE_TCP_HOST=database
-      - PEOPLE_SERVICE_HOST=people-service
+      <<: *auth-env
+      DATABASE_TCP_HOST: database
+      PEOPLE_SERVICE_HOST: people-service
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
@@ -107,10 +111,9 @@ services:
     working_dir: /position-service
     expose:
       - 18090
-    ports:
-      - 18090:18090
     environment:
-      - DATABASE_TCP_HOST=database
+      <<: *auth-env
+      DATABASE_TCP_HOST: database
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
@@ -128,14 +131,13 @@ services:
     working_dir: /trade-service
     expose:
       - 18092
-    ports:
-      - 18092:18092
     environment:
-      - DATABASE_TCP_HOST=database
-      - PEOPLE_SERVICE_HOST=people-service
-      - ACCOUNT_SERVICE_HOST=account-service
-      - REFERENCE_DATA_HOST=reference-data
-      - TRADE_FEED_HOST=trade-feed
+      <<: *auth-env
+      DATABASE_TCP_HOST: database
+      PEOPLE_SERVICE_HOST: people-service
+      ACCOUNT_SERVICE_HOST: account-service
+      REFERENCE_DATA_HOST: reference-data
+      TRADE_FEED_HOST: trade-feed
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
@@ -157,11 +159,10 @@ services:
     working_dir: /trade-processor
     expose:
       - 18091
-    ports:
-      - 18091:18091
     environment:
-      - DATABASE_TCP_HOST=database
-      - TRADE_FEED_HOST=trade-feed
+      <<: *auth-env
+      DATABASE_TCP_HOST: database
+      TRADE_FEED_HOST: trade-feed
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
@@ -180,8 +181,6 @@ services:
     working_dir: /web-front-end/angular
     expose:
       - 18093
-    ports:
-      - 18093:18093
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
@@ -206,13 +205,11 @@ services:
     networks:
       - localnet
     depends_on:
-      - database
       - trade-feed
       - people-service
       - account-service
       - position-service
       - trade-service
-      - trade-processor
       - web-front-end-angular
 
 networks:

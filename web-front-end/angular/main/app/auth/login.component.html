@@ -1,0 +1,17 @@
+<div class="container mt-4" style="max-width: 420px;">
+    <h4 class="mb-3">Sign in to TraderX</h4>
+    <form (ngSubmit)="submit()" #loginForm="ngForm">
+        <div class="mb-3">
+            <label class="form-label" for="logonId">Logon id</label>
+            <input id="logonId" name="logonId" class="form-control" autocomplete="username"
+                   [(ngModel)]="logonId" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="password">Password</label>
+            <input id="password" name="password" type="password" class="form-control" autocomplete="current-password"
+                   [(ngModel)]="password" required />
+        </div>
+        <div class="alert alert-danger py-2" *ngIf="error">{{ error }}</div>
+        <button class="btn btn-primary w-100" type="submit" [disabled]="busy">Sign in</button>
+    </form>
+</div>

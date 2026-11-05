@@ -2,9 +2,13 @@ openapi: 3.0.1
 info:
   title: "Position Service - TraderX"
   version: "1.0"
+# Every operation requires a TraderX bearer token unless it overrides this with `security: []`.
+security:
+  - bearerAuth: []
 paths:
   /health:
     get:
+      security: []
       operationId: health
       responses:
         "200":
@@ -58,6 +62,12 @@ paths:
                   $ref: '#/components/schemas/Position'
   
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: TraderX bearer token (HS256) obtained from people-service POST /Auth/Login
   schemas:
     Position:
       type: object

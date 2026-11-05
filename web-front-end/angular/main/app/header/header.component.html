@@ -3,10 +3,14 @@
         <img width="50px" src="assets/img/traderx-apple-touch-icon.png"/>
         <div style="font-size: 1.5em">FINOS | TraderX Sample Application</div>
         <img width="30px" src="assets/img/FINOS_Icon_White.png"/>
+        <div class="ms-auto d-flex align-items-center" *ngIf="auth.session as session">
+            <span class="me-3">{{ session.fullName || session.logonId }}</span>
+            <button class="btn btn-outline-light btn-sm" type="button" (click)="logout()">Sign out</button>
+        </div>
     </div>
 </nav>
 
-<ul class="nav nav-tabs mt-3">
+<ul class="nav nav-tabs mt-3" *ngIf="auth.isAuthenticated">
     <li class="nav-item">
         <a class="nav-link" routerLink="/trade" routerLinkActive="active">Trade</a>
     </li>

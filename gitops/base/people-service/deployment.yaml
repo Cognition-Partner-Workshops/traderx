@@ -18,6 +18,23 @@ spec:
     spec:
       containers:
         - name: people-service
+          env:
+            - name: TRADERX_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: traderx-auth
+                  key: TRADERX_AUTH_SECRET
+            - name: TRADERX_DEMO_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: traderx-auth
+                  key: TRADERX_DEMO_USER_PASSWORD
+            - name: TRADERX_ADMIN_USERS
+              valueFrom:
+                secretKeyRef:
+                  name: traderx-auth
+                  key: TRADERX_ADMIN_USERS
+                  optional: true
           image: traderx/people-service
           imagePullPolicy: IfNotPresent
           ports:

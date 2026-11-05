@@ -467,3 +467,6 @@ website/.docusaurus
 website/npm-debug.log*
 website/yarn-debug.log*
 website/yarn-error.log*
+# local auth material for gitops/local (see traderx-auth.env.example)
+gitops/local/traderx/traderx-auth.env
+.env

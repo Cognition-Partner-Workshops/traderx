@@ -1,5 +1,9 @@
 package finos.traderx.messaging.socketio;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
 import java.net.URI;
 
 import org.json.JSONObject;
@@ -14,6 +18,7 @@ import finos.traderx.messaging.Envelope;
 import finos.traderx.messaging.PubSubException;
 import finos.traderx.messaging.Subscriber;
 import io.socket.client.IO;
+import io.socket.client.Manager;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
@@ -32,8 +37,32 @@ public abstract class SocketIOJSONSubscriber<T> implements Subscriber<T>, Initia
         this.objectType = typeClass;
     }
 
+    private Supplier<String> tokenSupplier;
+
+    /**
+     * Supplies the bearer token presented to the trade-feed in the Socket.IO
+     * handshake ("auth.token"). The feed rejects connections without a valid token.
+     */
+    public void setTokenSupplier(Supplier<String> tokenSupplier) {
+        this.tokenSupplier = tokenSupplier;
+    }
+
     protected IO.Options getIOOptions() {
-        return new IO.Options();
+        IO.Options options = new IO.Options();
+        if (tokenSupplier != null) {
+            Map<String, String> auth = new HashMap<>();
+            auth.put("token", tokenSupplier.get());
+            options.auth = auth;
+        }
+        return options;
+    }
+
+    /** Refresh the handshake token before every reconnect attempt so an expired token never gets replayed. */
+    protected void refreshTokenOnReconnect(Socket socket, IO.Options options) {
+        if (tokenSupplier == null) {
+            return;
+        }
+        socket.io().on(Manager.EVENT_RECONNECT_ATTEMPT, args -> options.auth.put("token", tokenSupplier.get()));
     }
 
     final JavaType envelopeType;
@@ -93,7 +122,9 @@ public abstract class SocketIOJSONSubscriber<T> implements Subscriber<T>, Initia
     }
 
     protected Socket internalConnect(URI uri) throws Exception {
-        Socket s = IO.socket(uri, getIOOptions());
+        IO.Options options = getIOOptions();
+        Socket s = IO.socket(uri, options);
+        refreshTokenOnReconnect(s, options);
         s.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {

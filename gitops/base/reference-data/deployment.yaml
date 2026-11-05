@@ -19,6 +19,11 @@ spec:
       containers:
         - name: reference-data
           env:
+            - name: TRADERX_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: traderx-auth
+                  key: TRADERX_AUTH_SECRET
             - name: REFERENCE_DATA_SERVICE_PORT
               value: "18095"
           image: traderx/reference-data

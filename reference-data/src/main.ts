@@ -12,8 +12,10 @@ async function bootstrap() {
         .setTitle('Reference Data Example')
         .setDescription('The Reference Data API description')
         .setVersion('1.0')
+        .addBearerAuth()
         .build();
     const document = SwaggerModule.createDocument(app, config);
+    // Public by design: API documentation only. Every other route is guarded by JwtAuthGuard.
     SwaggerModule.setup('api', app, document);
 
     await app.listen(port, hostname);

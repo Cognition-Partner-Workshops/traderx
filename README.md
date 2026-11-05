@@ -50,6 +50,34 @@ The project consists of multiple moving parts, and you can see how things hang t
 | [trade-processor](trade-processor) | java/spring | Trade Feed consumer which processes trade/orders |
 | [web-front-end](web-front-end) | html/angular or react | Interactive UI for executing trades and viewing blotter. Note: the AngularJS GUI was an initial contribution and contains account management capabilities. The React GUI was contributed during a hack day and may not work for managing accounts, but it does work for executing trades and viewing the blotter |
 
+## Authentication and authorization
+
+Every non-public endpoint in TraderX requires a validated caller identity. Services share one
+HS256 secret (`TRADERX_AUTH_SECRET`, at least 32 bytes) and accept bearer tokens (JWT, issuer
+`traderx`) carrying a `sub` and a `roles` claim (`USER`, `ADMIN`, `SERVICE`).
+
+* **Token issuer** – `people-service` `POST /Auth/Login` (`{logonId, password}`) validates the user
+  against the directory and `TRADERX_DEMO_USER_PASSWORD`, and returns a token. Logon ids listed in
+  `TRADERX_ADMIN_USERS` also receive `ADMIN`. The Angular front end has a login page and sends the
+  token on every HTTP call and in the trade-feed Socket.IO handshake (`auth.token`).
+* **Ownership** – account, position and trade data for an account is only returned to users mapped
+  to that account (`ACCOUNTUSERS`), or to `ADMIN`/`SERVICE` callers. Creating accounts and account-user
+  mappings requires `ADMIN`. `trade-service` forwards the caller's token to `account-service` so a user
+  can only submit trades for their own accounts.
+* **Service-to-service** – `trade-service` and `trade-processor` mint their own `SERVICE` tokens with
+  the shared secret. The trade-feed only accepts publishes from `SERVICE` callers; `USER` callers may
+  only subscribe to `/accounts/{id}/trades|positions` for accounts they own. `POST /tradeservice/order`
+  on `trade-processor` is `SERVICE`/`ADMIN` only and is no longer exposed through the ingress.
+* **Explicitly public** – Swagger/OpenAPI documentation (`/`, `/swagger-ui/**`, `/v3/api-docs/**`,
+  reference-data `/api`), health probes (`/health`), the trade-feed static page and `POST /Auth/Login`.
+* **Network** – the ingress no longer proxies the H2 console; Docker Compose publishes only the ingress
+  (`8080`); the H2 PostgreSQL listener and remote web console are disabled unless
+  `DATABASE_PG_ENABLED=true` / `DATABASE_WEB_ALLOW_OTHERS=true`.
+
+Required environment: copy `.env.example` to `.env` (Compose) or
+`gitops/local/traderx/traderx-auth.env.example` to `traderx-auth.env` (Kubernetes) and set
+`TRADERX_AUTH_SECRET`, `TRADERX_DEMO_USER_PASSWORD` and optionally `TRADERX_ADMIN_USERS`.
+
 ## Installation  
 
 This is installed locally through normal git clone operations.
@@ -71,6 +99,10 @@ export TRADE_PROCESSOR_SERVICE_PORT=18091
 export TRADING_SERVICE_PORT=18092
 export WEB_SERVICE_ANGULAR_PORT=18093  #Angular
 export WEB_SERVICE_REACT_PORT=18094  #React
+# Shared auth material (see "Authentication and authorization")
+export TRADERX_AUTH_SECRET=$(openssl rand -base64 48)
+export TRADERX_DEMO_USER_PASSWORD=change-me
+export TRADERX_ADMIN_USERS=user01
 ```
 
 The recommended starting sequence to let everything find what it needs is:
