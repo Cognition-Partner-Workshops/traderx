@@ -5,7 +5,6 @@ set -a
 : ${DATABASE_TCP_PORT:=18082}
 : ${DATABASE_PG_PORT:=18083}
 : ${DATABASE_WEB_PORT:=18084}
-: ${DATABASE_DBUSER:=sa}
 : ${DATABASE_H2JAR:=./build/libs/database.jar}
 : ${DATABASE_DATA_DIR:=./_data}
 : ${DATABASE_DBNAME:=traderx}
@@ -13,6 +12,11 @@ set -a
 : ${DATABASE_JDBC_URL:="jdbc:h2:tcp://$HOSTNAME:$DATABASE_TCP_PORT/$DATABASE_DBNAME"}
 
 set +a
+
+if [ -z "${DATABASE_DBUSER:-}" ]; then
+  echo 'ERROR: DATABASE_DBUSER must be set to a non-empty username (see database/README.md). Refusing to start.' >&2
+  exit 1
+fi
 
 ### Fail closed: refuse to start without an operator-supplied, non-default password (SSC-01)
 if [ -z "${DATABASE_DBPASS:-}" ] || [ "$DATABASE_DBPASS" = "sa" ]; then

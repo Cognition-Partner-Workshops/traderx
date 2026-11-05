@@ -23,7 +23,7 @@ PORT_BASE=$(( 20000 + RANDOM % 9000 ))
 # 1. Fail closed when no password / the default password is supplied
 for case in unset sa; do
   if [ "$case" = unset ]; then pw_env=(-u DATABASE_DBPASS); else pw_env=(DATABASE_DBPASS=sa); fi
-  (cd "$DIR" && env "${pw_env[@]}" DATABASE_DATA_DIR="$WORK/$case" DATABASE_TCP_PORT=$PORT_BASE \
+  (cd "$DIR" && env "${pw_env[@]}" DATABASE_DBUSER=ssc01_test_user DATABASE_DATA_DIR="$WORK/$case" DATABASE_TCP_PORT=$PORT_BASE \
      DATABASE_PG_PORT=$((PORT_BASE+1)) DATABASE_WEB_PORT=$((PORT_BASE+2)) \
      timeout 20 bash run.sh >"$WORK/$case.log" 2>&1)
   rc=$?
@@ -33,7 +33,7 @@ done
 
 # 2. Start the DB in a container with an operator-supplied password
 docker run -d --name "$NAME" -v "$DIR":/database:ro -w /database \
-  -e DATABASE_DBPASS="$PASSWORD" -e DATABASE_DATA_DIR=/tmp/_data "$IMAGE" bash run.sh >/dev/null || { echo "docker run failed"; exit 2; }
+  -e DATABASE_DBUSER=ssc01_test_user -e DATABASE_DBPASS="$PASSWORD" -e DATABASE_DATA_DIR=/tmp/_data "$IMAGE" bash run.sh >/dev/null || { echo "docker run failed"; exit 2; }
 for _ in $(seq 1 60); do
   docker logs "$NAME" 2>&1 | grep -q 'TCP server running' && break
   sleep 1
@@ -45,7 +45,7 @@ echo "DB container $NAME at $IP"
 echo "SELECT COUNT(*) FROM ACCOUNTS;" > "$WORK/q.sql"
 jdbc() { java -cp "$JAR" org.h2.tools.RunScript -url "$1" -user "$2" -password "$3" -script "$WORK/q.sql" >"$WORK/jdbc.log" 2>&1; }
 
-if jdbc "jdbc:h2:tcp://$IP:18082/traderx" sa "$PASSWORD"; then pass "legitimate TCP login with the configured password works"
+if jdbc "jdbc:h2:tcp://$IP:18082/traderx" ssc01_test_user "$PASSWORD"; then pass "legitimate TCP login with the configured password works"
 else cat "$WORK/jdbc.log"; failc "legitimate TCP login failed"; fi
 
 if jdbc "jdbc:h2:tcp://$IP:18082/traderx" sa sa; then failc "default sa/sa credentials accepted over TCP"

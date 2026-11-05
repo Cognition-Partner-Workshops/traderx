@@ -6,7 +6,7 @@
 
 This is designed to play the role of a SQL database that runs standalone as part of an example environment. The other processes in this environment interact with this via SQL / JDBC drivers and therefore this component can be swapped out in other iterations of this environment and replaced with a robust and productionizable RDBMS.
 
-This uses H2 Java-based database as a standalone server and initializes with an empty SQL schema every time it is started. It requires a password (see below) and refuses to start without one.
+This uses H2 Java-based database as a standalone server and initializes with an empty SQL schema every time it is started. It requires operator-supplied credentials (see below) and refuses to start without them.
 
 ## Default Port Numbers
 | Protocol | Port Number |
@@ -18,21 +18,21 @@ This uses H2 Java-based database as a standalone server and initializes with an 
 ## Connecting to this database remotely
 You can use the `$DATABASE_TCP_PORT`  or `$DATABASE_PG_PORT` and the database URL in JDBC is `jdbc:h2:./_data/traderx`
 
-The username defaults to `sa`; the password is whatever you set in `DATABASE_DBPASS`.
+The username is whatever you set in `DATABASE_DBUSER`; the password is whatever you set in `DATABASE_DBPASS`.
 
 ## Connecting to the web console
 You can use the `$DATABASE_HTTP_PORT`  or `$DATABASE_PG_PORT` and the database URL in JDBC is `jdbc:h2:traderx` (This is because -baseDir is already set to ./_data) - NOTE you will have to change the default setting in the web console which often uses a home directory path. 
 
-The username defaults to `sa`; the password is whatever you set in `DATABASE_DBPASS`.
+The username is whatever you set in `DATABASE_DBUSER`; the password is whatever you set in `DATABASE_DBPASS`.
 
 The database you want to use in the H2 GUI is `./traderx` (This may not be the default listed in the GUI)
 
 ## Credentials and network exposure (SSC-01)
-`run.sh` fails closed: it exits with an error unless `DATABASE_DBPASS` is set to a non-empty value other than the well-known default `sa`. No password is committed to the repo; the operator chooses one:
+`run.sh` fails closed: it exits with an error unless both `DATABASE_DBUSER` and `DATABASE_DBPASS` are set to non-empty values, and the password is not the well-known default `sa`. No credential is committed to the repo; the operator chooses them:
 
-* docker-compose: put `DATABASE_DBPASS=<your password>` in a `.env` file next to `docker-compose.yml` (`.env` is git-ignored) or export it. Compose refuses to start without it and passes it to `database`, `account-service`, `position-service` and `trade-processor`.
-* Kubernetes (`gitops/`): create the secret before deploying: `kubectl create secret generic traderx-database --from-literal=password=<your password>`.
-* Radius: pass `--parameters databasePassword=<your password>`.
+* docker-compose: put `DATABASE_DBUSER=<your username>` and `DATABASE_DBPASS=<your password>` in a `.env` file next to `docker-compose.yml` (`.env` is git-ignored) or export them. Compose refuses to start without them and passes them to `database`, `account-service`, `position-service` and `trade-processor`.
+* Kubernetes (`gitops/`): create the secret before deploying: `kubectl create secret generic traderx-database --from-literal=username=<your username> --from-literal=password=<your password>`.
+* Radius: pass `--parameters databaseUsername=<your username> databasePassword=<your password>`.
 
 Only the TCP server (`$DATABASE_TCP_PORT`, default 18082) accepts remote connections, because the other TraderX services connect to it over JDBC (`jdbc:h2:tcp://database:18082/traderx`) with the password above. The PG server and the web console only accept connections from the same host/container and their ports are not published by docker-compose, the Dockerfile, Kubernetes or Radius. To use the web console, run it from inside the container or port-forward to it.
 
@@ -89,5 +89,5 @@ Example: http://localhost:18084
 
 1. Visit http://localhost:18084 or whatever port you run your service on
 2. You should see a web console, prompting you for a username, password, and JDBC URL - Values might not be auto-populated correctly
-3. Username should be `sa` and the password your `DATABASE_DBPASS` and the JDBC URL should be `jdbc:h2:./traderx` and the Driver should be `Generic H2 Embedded`
+3. Username should be your `DATABASE_DBUSER`, the password your `DATABASE_DBPASS`, and the JDBC URL should be `jdbc:h2:./traderx` with the Driver `Generic H2 Embedded`.
 4. Click `Connect`

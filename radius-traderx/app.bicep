@@ -4,6 +4,11 @@ extension radius
 param application string
 
 @secure()
+@minLength(1)
+@description('H2 username for DATABASE_DBUSER; supplied by the operator at deploy time')
+param databaseUsername string
+
+@secure()
 @description('H2 password for DATABASE_DBPASS; supplied by the operator at deploy time')
 param databasePassword string
 
@@ -19,6 +24,9 @@ resource database 'Applications.Core/containers@2023-10-01-preview' = {
         }
       }
       env: {
+        DATABASE_DBUSER: {
+          value: databaseUsername
+        }
         DATABASE_DBPASS: {
           value: databasePassword
         }
@@ -84,6 +92,9 @@ resource accountservice 'Applications.Core/containers@2023-10-01-preview' = {
         }
       }
       env: {
+        DATABASE_DBUSER: {
+          value: databaseUsername
+        }
         DATABASE_DBPASS: {
           value: databasePassword
         }
@@ -118,6 +129,9 @@ resource positionservice 'Applications.Core/containers@2023-10-01-preview' = {
         }
       }
       env: {
+        DATABASE_DBUSER: {
+          value: databaseUsername
+        }
         DATABASE_DBPASS: {
           value: databasePassword
         }
@@ -195,6 +209,9 @@ resource tradeprocessor 'Applications.Core/containers@2023-10-01-preview' = {
         }
       }
       env: {
+        DATABASE_DBUSER: {
+          value: databaseUsername
+        }
         DATABASE_DBPASS: {
           value: databasePassword
         }

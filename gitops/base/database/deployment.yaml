@@ -22,6 +22,11 @@ spec:
           - containerPort: 18082
             protocol: TCP
         env:
+          - name: DATABASE_DBUSER
+            valueFrom:
+              secretKeyRef:
+                name: traderx-database
+                key: username
           - name: DATABASE_DBPASS
             valueFrom:
               secretKeyRef:
