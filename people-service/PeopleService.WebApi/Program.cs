@@ -27,7 +27,8 @@ builder.Services.AddFluentValidationClientsideAdapters();
 builder.Host.UseSerilog((hostContext, services, configuration) =>
 {
     configuration.WriteTo.Console();
-    configuration.WriteTo.RollingFile("Logs/PeopleService.log");
+    configuration.WriteTo.File("Logs/PeopleService-.log", rollingInterval: RollingInterval.Day,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] {Message}{NewLine}{Exception}");
 });
 
 var app = builder.Build();
