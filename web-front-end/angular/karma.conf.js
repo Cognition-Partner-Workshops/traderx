@@ -3,8 +3,7 @@
 
 const path = require('path');
 
-// See: https://github.com/karma-runner/karma-chrome-launcher#headless-chromium-with-puppeteer
-process.env.CHROME_BIN = require('puppeteer').executablePath();
+process.env.CHROME_BIN = process.env.CHROME_BIN || 'google-chrome';
 
 module.exports = function (config) {
     config.set({

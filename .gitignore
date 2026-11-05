@@ -9,7 +9,6 @@ build/
 .corp
 
 # Exclude package-lock to avoid company builds overriding standard locations
-package-lock.json
 yarn.lock
 
 #NodeJS
