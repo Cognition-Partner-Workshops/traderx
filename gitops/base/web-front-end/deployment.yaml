@@ -16,13 +16,68 @@ spec:
       labels:
         app: web-front-end-angular
     spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi
+        - name: angular-cache
+          emptyDir:
+            sizeLimit: 1Gi
       containers:
         - image: traderx/web-front-end-angular
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 3Gi
+          startupProbe:
+            tcpSocket:
+              port: 18093
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            tcpSocket:
+              port: 18093
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 18093
+            periodSeconds: 20
+            failureThreshold: 3
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: angular-cache
+              mountPath: /web-front-end/angular/.angular
           name: web-front-end-angular
           env:
             - name: WEB_FRONT_END_START_MODE
               value: "start-prod"
+            - name: HOME
+              value: /tmp
+            - name: npm_config_cache
+              value: /tmp/.npm
+            - name: NG_CLI_ANALYTICS
+              value: "false"
           ports:
             - containerPort: 18093
               protocol: TCP

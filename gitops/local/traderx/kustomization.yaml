@@ -10,7 +10,30 @@ resources:
  - ../../base/people-service
  - ../../base/position-service
  - ../../base/reference-data
- - ../../base/trade-feed 
+ - ../../base/trade-feed
  - ../../base/trade-processor
  - ../../base/trade-service
- - ../../base/web-front-end 
+ - ../../base/web-front-end
+ - ../../base/network-policies
+
+# Explicit, immutable-by-convention tags instead of an implicit :latest.
+# Tilt's docker_build() matches these by repository name and substitutes its own build tag.
+images:
+ - name: traderx/database
+   newTag: "1.0.0"
+ - name: traderx/account-service
+   newTag: "1.0.0"
+ - name: traderx/people-service
+   newTag: "1.0.0"
+ - name: traderx/position-service
+   newTag: "1.0.0"
+ - name: traderx/reference-data
+   newTag: "1.0.0"
+ - name: traderx/trade-feed
+   newTag: "1.0.0"
+ - name: traderx/trade-processor
+   newTag: "1.0.0"
+ - name: traderx/trade-service
+   newTag: "1.0.0"
+ - name: traderx/web-front-end-angular
+   newTag: "1.0.0"

@@ -9,5 +9,9 @@ spec:
     - name: "18085"
       port: 8080
       targetPort: 18085
+    # Same-port alias: callers use http://reference-data:18085 (see *_SERVICE_HOST / TRADE_FEED_HOST).
+    - name: internal
+      port: 18085
+      targetPort: 18085
   selector:
     app: reference-data

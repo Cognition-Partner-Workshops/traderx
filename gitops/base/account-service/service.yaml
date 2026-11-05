@@ -9,5 +9,9 @@ spec:
     - name: "18088"
       port: 8080
       targetPort: 18088
+    # Same-port alias: callers use http://account-service:18088 (see *_SERVICE_HOST / TRADE_FEED_HOST).
+    - name: internal
+      port: 18088
+      targetPort: 18088
   selector:
     app: account-service

@@ -1,0 +1,403 @@
+# Default deny: no pod in the namespace accepts or initiates traffic
+# unless an explicit policy below allows it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-controller-to-web-front-end-angular
+spec:
+  podSelector:
+    matchLabels:
+      app: web-front-end-angular
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 18093
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-controller-to-account-service
+spec:
+  podSelector:
+    matchLabels:
+      app: account-service
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 18088
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-controller-to-people-service
+spec:
+  podSelector:
+    matchLabels:
+      app: people-service
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 18089
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-controller-to-position-service
+spec:
+  podSelector:
+    matchLabels:
+      app: position-service
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 18090
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-controller-to-reference-data
+spec:
+  podSelector:
+    matchLabels:
+      app: reference-data
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 18085
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-controller-to-trade-feed
+spec:
+  podSelector:
+    matchLabels:
+      app: trade-feed
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 18086
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-controller-to-trade-service
+spec:
+  podSelector:
+    matchLabels:
+      app: trade-service
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 18092
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-controller-to-trade-processor
+spec:
+  podSelector:
+    matchLabels:
+      app: trade-processor
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 18091
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-database
+spec:
+  podSelector:
+    matchLabels:
+      app: database
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: account-service
+        - podSelector:
+            matchLabels:
+              app: position-service
+        - podSelector:
+            matchLabels:
+              app: trade-processor
+      ports:
+        - protocol: TCP
+          port: 18082
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-account-service
+spec:
+  podSelector:
+    matchLabels:
+      app: account-service
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: trade-service
+      ports:
+        - protocol: TCP
+          port: 18088
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-people-service
+spec:
+  podSelector:
+    matchLabels:
+      app: people-service
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: trade-service
+        - podSelector:
+            matchLabels:
+              app: account-service
+      ports:
+        - protocol: TCP
+          port: 18089
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-reference-data
+spec:
+  podSelector:
+    matchLabels:
+      app: reference-data
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: trade-service
+      ports:
+        - protocol: TCP
+          port: 18085
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-trade-feed
+spec:
+  podSelector:
+    matchLabels:
+      app: trade-feed
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: trade-service
+        - podSelector:
+            matchLabels:
+              app: trade-processor
+      ports:
+        - protocol: TCP
+          port: 18086
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-from-account-service
+spec:
+  podSelector:
+    matchLabels:
+      app: account-service
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: database
+      ports:
+        - protocol: TCP
+          port: 18082
+    - to:
+        - podSelector:
+            matchLabels:
+              app: people-service
+      ports:
+        - protocol: TCP
+          port: 18089
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-from-position-service
+spec:
+  podSelector:
+    matchLabels:
+      app: position-service
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: database
+      ports:
+        - protocol: TCP
+          port: 18082
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-from-trade-processor
+spec:
+  podSelector:
+    matchLabels:
+      app: trade-processor
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: database
+      ports:
+        - protocol: TCP
+          port: 18082
+    - to:
+        - podSelector:
+            matchLabels:
+              app: trade-feed
+      ports:
+        - protocol: TCP
+          port: 18086
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-from-trade-service
+spec:
+  podSelector:
+    matchLabels:
+      app: trade-service
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: account-service
+      ports:
+        - protocol: TCP
+          port: 18088
+    - to:
+        - podSelector:
+            matchLabels:
+              app: people-service
+      ports:
+        - protocol: TCP
+          port: 18089
+    - to:
+        - podSelector:
+            matchLabels:
+              app: reference-data
+      ports:
+        - protocol: TCP
+          port: 18085
+    - to:
+        - podSelector:
+            matchLabels:
+              app: trade-feed
+      ports:
+        - protocol: TCP
+          port: 18086

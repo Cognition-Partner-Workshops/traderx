@@ -9,5 +9,9 @@ spec:
     - name: "18086"
       port: 8080
       targetPort: 18086
+    # Same-port alias: callers use http://trade-feed:18086 (see *_SERVICE_HOST / TRADE_FEED_HOST).
+    - name: internal
+      port: 18086
+      targetPort: 18086
   selector:
     app: trade-feed
