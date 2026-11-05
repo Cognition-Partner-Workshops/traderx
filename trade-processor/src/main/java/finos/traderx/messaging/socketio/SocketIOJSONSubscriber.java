@@ -32,8 +32,18 @@ public abstract class SocketIOJSONSubscriber<T> implements Subscriber<T>, Initia
         this.objectType = typeClass;
     }
 
+    private String authToken;
+
+    public void setAuthToken(String token) {
+        authToken = token;
+    }
+
     protected IO.Options getIOOptions() {
-        return new IO.Options();
+        IO.Options options = new IO.Options();
+        if (authToken != null && !authToken.isBlank()) {
+            options.auth = java.util.Collections.singletonMap("token", authToken);
+        }
+        return options;
     }
 
     final JavaType envelopeType;

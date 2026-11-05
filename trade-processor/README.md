@@ -46,3 +46,8 @@ To specify the database properties, the following properties should be used
 
 
 You can see all configuration details in [src/main/resources/application.properties](application.properties)
+## Internal order endpoint
+
+`POST /tradeservice/order` books an order directly, without trade-service validation. It is internal-only and is not routed by the ingress. It is disabled by default. To enable it, set `TRADE_PROCESSOR_ORDER_ENDPOINT_ENABLED=true`. Callers must then send the token from `TRADE_PROCESSOR_ORDER_ENDPOINT_TOKEN` in the `X-Internal-Token` header. If no token is configured, every call is rejected with 403.
+
+The trade feed subscriber sends `TRADE_FEED_PUBLISH_TOKEN` in its socket handshake, because trade-feed only lets authenticated internal services subscribe to `/trades`.

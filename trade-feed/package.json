@@ -4,11 +4,14 @@
   "description": "Simple SocketIO based publish-subscribe server",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test test/",
     "start": "node index.js"
   },
   "author": "",
   "license": "ISC",
+  "devDependencies": {
+    "socket.io-client": "^4.7.5"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",

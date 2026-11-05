@@ -36,30 +36,54 @@ function wrapMessage( sender, topic, payloadType, payload){
   }
 }
 
-function joinMessage(user,topic){
-  return wrapMessage('System',topic,'message',{message: `New Joiner ${user} to topic ${topic}`});
-}
-
-function leaveMessage(user,topic){
-  return wrapMessage('System',topic,'message',{message: `${user} has left ${topic}`});
-}
-
 function broadcast(from, data) {
   var message=wrapMessage(from,data.topic,data.type,data.payload);
   log.info(`Publish ${data.topic} -> ${JSON.stringify(message)}`);
   io.sockets.in([data.topic, "/*"]).emit(PUBLISH, message);
 }
 
+const crypto = require('node:crypto');
+
+// Browsers may only follow per-account topics; the order stream is internal-only.
+const CLIENT_TOPIC_PATTERN = /^\/accounts\/\d{1,18}\/(trades|positions)$/;
+const INTERNAL_TOPICS = ['/trades'];
+
+function isInternalService(socket) {
+  const expected = process.env.TRADE_FEED_PUBLISH_TOKEN;
+  const supplied = socket.handshake.auth && socket.handshake.auth.token;
+  if (!expected || typeof supplied !== 'string') {
+    return false;
+  }
+  const a = Buffer.from(expected);
+  const b = Buffer.from(supplied);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+function canSubscribe(socket, topic) {
+  if (typeof topic !== 'string') {
+    return false;
+  }
+  if (CLIENT_TOPIC_PATTERN.test(topic)) {
+    return true;
+  }
+  return INTERNAL_TOPICS.includes(topic) && isInternalService(socket);
+}
+
 io.on('connection', (socket) => {
   log.info(`New Connection from ${socket.id}`);
   socket.on(SUBSCRIBE, (topic) => {
+    if (!canSubscribe(socket, topic)) {
+      log.warn(`Rejected subscribe from ${socket.id} to ${JSON.stringify(topic)}`);
+      return;
+    }
     log.info(`Subscribe ${topic}`);
     socket.join(topic);
-    broadcast('System', joinMessage(socket.id,topic));
   });
   socket.on(UNSUBSCRIBE, (topic) => {
+    if (typeof topic !== 'string') {
+      return;
+    }
     log.info(`Unsubscribe ${topic}`);
-    broadcast('System', leaveMessage(socket.id,topic));
     socket.leave(topic);
   });
   socket.on(PUBLISH, (data) => {

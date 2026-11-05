@@ -24,3 +24,7 @@ npm run start
 ```
 
 Now you can edit the site, commit and merge as normal. If you performed the optional live environment step, you'll see a live-reloading copy of the site open in your browser at <http://localhost:18086/> (or whaterver port you are using)
+
+## Subscription rules
+
+Browser clients may only subscribe to `/accounts/<numeric id>/trades` and `/accounts/<numeric id>/positions`. The internal order stream `/trades` can only be subscribed to by sockets whose handshake `auth.token` matches `TRADE_FEED_PUBLISH_TOKEN`. The wildcard `/*` and any malformed or non-string topic are rejected. Join and leave events are no longer broadcast, so socket ids do not leak to other clients.
