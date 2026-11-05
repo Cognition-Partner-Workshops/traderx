@@ -1,4 +1,5 @@
 const sockio = require("socket.io");
+const { timingSafeEqual } = require('crypto');
 const app = require('express')();
 const winston = require('winston');
 const http = require('http').createServer(app);
@@ -10,6 +11,7 @@ const io = new sockio.Server(http, {
   }
 });
 const port = process.env.TRADE_FEED_PORT || 18086;
+const publishToken = process.env.TRADE_FEED_PUBLISH_TOKEN;
 
 const log = winston.createLogger({
   transports: [
@@ -18,6 +20,10 @@ const log = winston.createLogger({
 });
 
 // command names
+if (!publishToken) {
+  log.warn('TRADE_FEED_PUBLISH_TOKEN is unset; all publishes will be rejected');
+}
+
 const SUBSCRIBE = "subscribe";
 const UNSUBSCRIBE = "unusbscribe";
 const PUBLISH = "publish";
@@ -51,6 +57,11 @@ function broadcast(from, data) {
 }
 
 io.on('connection', (socket) => {
+  const token = socket.handshake.auth.token;
+  const expected = Buffer.from(publishToken || '');
+  const supplied = Buffer.from(typeof token === 'string' ? token : '');
+  socket.data.canPublish = Boolean(publishToken) && expected.length === supplied.length
+    && timingSafeEqual(expected, supplied);
   log.info(`New Connection from ${socket.id}`);
   socket.on(SUBSCRIBE, (topic) => {
     log.info(`Subscribe ${topic}`);
@@ -63,6 +74,10 @@ io.on('connection', (socket) => {
     socket.leave(topic);
   });
   socket.on(PUBLISH, (data) => {
+    if (!socket.data.canPublish) {
+      log.warn(`Rejected unauthorized publish from ${socket.id}`);
+      return;
+    }
     broadcast(socket.id, data);
   });
 });

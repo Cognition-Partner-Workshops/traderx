@@ -21,6 +21,12 @@ spec:
           imagePullPolicy: IfNotPresent
           name: trade-feed
           env:
+            - name: TRADE_FEED_PUBLISH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: trade-feed-publish-token
+                  key: token
+                  optional: true
             - name: TRADE_FEED_PORT
               value: "18086"
           ports:

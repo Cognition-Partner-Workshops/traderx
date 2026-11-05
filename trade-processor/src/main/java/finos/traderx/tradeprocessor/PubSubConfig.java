@@ -16,10 +16,14 @@ public class PubSubConfig {
     @Value("${trade.feed.address}")
     private String tradeFeedAddress;
 
+    @Value("${trade.feed.publish.token}")
+    private String tradeFeedPublishToken;
+
     @Bean 
     public Publisher<Position> positionPublisher() {
         SocketIOJSONPublisher<Position> publisher = new SocketIOJSONPublisher<Position>(){};
         publisher.setSocketAddress(tradeFeedAddress);
+        publisher.setPublishToken(tradeFeedPublishToken);
         return publisher;
     }
 
@@ -27,6 +31,7 @@ public class PubSubConfig {
     public Publisher<Trade> tradePublisher() {
         SocketIOJSONPublisher<Trade> publisher = new SocketIOJSONPublisher<Trade>(){};
         publisher.setSocketAddress(tradeFeedAddress);
+        publisher.setPublishToken(tradeFeedPublishToken);
         return publisher;
     }
 
