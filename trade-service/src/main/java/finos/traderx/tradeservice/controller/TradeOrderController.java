@@ -17,6 +17,7 @@ import finos.traderx.messaging.PubSubException;
 import finos.traderx.messaging.Publisher;
 import finos.traderx.tradeservice.exceptions.ResourceNotFoundException;
 import finos.traderx.tradeservice.model.Account;
+import finos.traderx.tradeservice.model.AccountNumberMask;
 import finos.traderx.tradeservice.model.Security;
 import finos.traderx.tradeservice.model.TradeOrder;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,7 +52,7 @@ public class TradeOrderController {
 		}
 		else if(!validateAccount(tradeOrder.getAccountId()))
 		{
-			throw new ResourceNotFoundException(tradeOrder.getAccountId() + " not found in Account service.");
+			throw new ResourceNotFoundException(AccountNumberMask.mask(tradeOrder.getAccountId()) + " not found in Account service.");
 		}
 		else
 		{

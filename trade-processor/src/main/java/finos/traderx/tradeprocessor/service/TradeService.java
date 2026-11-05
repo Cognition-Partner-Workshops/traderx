@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import finos.traderx.messaging.PubSubException;
@@ -25,6 +26,9 @@ public class TradeService {
 	@Autowired
 	PositionRepository positionRepository;
 
+	@Autowired
+	TradeStatusHistoryRepository tradeStatusHistoryRepository;
+
 	
     @Autowired 
     private Publisher<Trade> tradePublisher;
@@ -32,6 +36,7 @@ public class TradeService {
     @Autowired
     private Publisher<Position> positionPublisher;
     
+	@Transactional
 	public TradeBookingResult processTrade(TradeOrder order) {
 		log.info("Trade order received : "+order);
         Trade t=new Trade();
@@ -59,16 +64,13 @@ public class TradeService {
 		int newQuantity=((order.getSide()==TradeSide.Buy)?1:-1)*t.getQuantity();
 		position.setQuantity(position.getQuantity()+newQuantity);
 		log.info("Trade {}",t);
-		tradeRepository.save(t);
+		saveWithStatusHistory(t);
 		positionRepository.save(position);
 		// Simulate the handling of this trade...
 		// Now mark as processing
-		t.setUpdated(new Date());
-		t.setState(TradeState.Processing);
+		changeState(t, TradeState.Processing);
 		// Now mark as settled
-		t.setUpdated(new Date());
-		t.setState(TradeState.Settled);
-		tradeRepository.save(t);
+		changeState(t, TradeState.Settled);
 		
 
 		TradeBookingResult result=new TradeBookingResult(t, position);
@@ -82,6 +84,17 @@ public class TradeService {
 		}
 		
 		return result;	
+	}
+
+	private void changeState(Trade t, TradeState state) {
+		t.setUpdated(new Date());
+		t.setState(state);
+		saveWithStatusHistory(t);
+	}
+
+	private void saveWithStatusHistory(Trade t) {
+		tradeRepository.save(t);
+		tradeStatusHistoryRepository.save(new TradeStatusHistory(t.getId(), t.getState(), t.getUpdated().toInstant()));
 	}
 
 }
