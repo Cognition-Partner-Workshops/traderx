@@ -3,6 +3,8 @@ version: '3.4'
 services:
   database:
     restart: always
+    environment:
+      - DATABASE_DBPASS=${DATABASE_DBPASS:?Set DATABASE_DBPASS (see database/README.md)}
     image: database
     build:
       context: database
@@ -82,6 +84,7 @@ services:
       - 18088:18088
     environment:
       - DATABASE_TCP_HOST=database
+      - DATABASE_DBPASS=${DATABASE_DBPASS:?Set DATABASE_DBPASS (see database/README.md)}
       - PEOPLE_SERVICE_HOST=people-service
     volumes:
       # Mount the root folder that contains .git
@@ -105,6 +108,7 @@ services:
       - 18090:18090
     environment:
       - DATABASE_TCP_HOST=database
+      - DATABASE_DBPASS=${DATABASE_DBPASS:?Set DATABASE_DBPASS (see database/README.md)}
     volumes:
       # Mount the root folder that contains .git
       - .:/workspace:cached
@@ -155,6 +159,7 @@ services:
       - 18091:18091
     environment:
       - DATABASE_TCP_HOST=database
+      - DATABASE_DBPASS=${DATABASE_DBPASS:?Set DATABASE_DBPASS (see database/README.md)}
       - TRADE_FEED_HOST=trade-feed
     volumes:
       # Mount the root folder that contains .git

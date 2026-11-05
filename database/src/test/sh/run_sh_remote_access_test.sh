@@ -18,6 +18,7 @@ check_absent() {
 
 check_absent "$DIR/run.sh" '-webAllowOthers' "run.sh does not start the web console with -webAllowOthers"
 check_absent "$DIR/run.sh" '-pgAllowOthers' "run.sh does not start the PG server with -pgAllowOthers"
+check_absent "$DIR/run.sh" 'DATABASE_DBPASS:=' "run.sh does not ship a default database password"
 check_absent "$DIR/Dockerfile" 'EXPOSE[[:space:]]+18084' "database Dockerfile does not expose the web console port"
 if [ -f "$ROOT/docker-compose.yml" ]; then
   check_absent "$ROOT/docker-compose.yml" '18084' "docker-compose does not publish the web console port"
