@@ -1,6 +1,7 @@
 using FluentValidation.AspNetCore;
 using Microsoft.OpenApi.Models;
 using PeopleService.Core.Infrastructure;
+using PeopleService.WebApi;
 using Serilog;
 using System.Reflection;
 
@@ -23,6 +24,10 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Progr
 builder.Services.AddPeopleServiceCore(builder.Configuration.GetSection("PeopleJsonFilePath"));
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddCors(options => options.AddPolicy(CorsOrigins.PolicyName, policy => policy
+    .WithOrigins(CorsOrigins.Parse(builder.Configuration[CorsOrigins.ConfigurationKey]))
+    .WithMethods("GET", "HEAD", "OPTIONS")
+    .AllowAnyHeader()));
 
 builder.Host.UseSerilog((hostContext, services, configuration) =>
 {
@@ -41,13 +46,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors(CorsOrigins.PolicyName);
+
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseCors(builder => builder
-    .AllowAnyOrigin()
-    .AllowAnyMethod()
-    .AllowAnyHeader());
-
 app.Run();
+
+public partial class Program { }
