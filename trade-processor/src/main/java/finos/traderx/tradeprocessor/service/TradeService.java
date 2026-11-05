@@ -1,5 +1,7 @@
 package finos.traderx.tradeprocessor.service;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +27,23 @@ public class TradeService {
 	@Autowired
 	PositionRepository positionRepository;
 
+	@Autowired
+	TradeStateChangeRepository tradeStateChangeRepository;
+
+	private Clock clock = Clock.systemUTC();
+
+	void setClock(Clock clock) {
+		this.clock = clock;
+	}
+
+	/** Every state change is appended to the trade's history with the UTC instant it happened. */
+	private void transition(Trade t, TradeState state) {
+		Instant now = clock.instant();
+		t.setState(state);
+		t.setUpdated(Date.from(now));
+		tradeStateChangeRepository.save(new TradeStateChange(t.getId(), state, now));
+	}
+
 	
     @Autowired 
     private Publisher<Trade> tradePublisher;
@@ -41,8 +60,8 @@ public class TradeService {
 		t.setId(UUID.randomUUID().toString());
 
 
-        t.setCreated(new Date());
-        t.setUpdated(new Date());
+        t.setCreated(Date.from(clock.instant()));
+        t.setUpdated(t.getCreated());
         t.setSecurity(order.getSecurity());
         t.setSide(order.getSide());
         t.setQuantity(order.getQuantity());
@@ -61,13 +80,12 @@ public class TradeService {
 		log.info("Trade {}",t);
 		tradeRepository.save(t);
 		positionRepository.save(position);
+		tradeStateChangeRepository.save(new TradeStateChange(t.getId(), TradeState.New, t.getCreated().toInstant()));
 		// Simulate the handling of this trade...
 		// Now mark as processing
-		t.setUpdated(new Date());
-		t.setState(TradeState.Processing);
+		transition(t, TradeState.Processing);
 		// Now mark as settled
-		t.setUpdated(new Date());
-		t.setState(TradeState.Settled);
+		transition(t, TradeState.Settled);
 		tradeRepository.save(t);
 		
 
