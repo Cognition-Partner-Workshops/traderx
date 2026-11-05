@@ -11,6 +11,7 @@ import { sleep } from 'main/app/test-utils/utils';
 import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
 import { DropdownModule } from 'main/app/dropdown/dropdown.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { of, throwError } from 'rxjs';
 
 
 describe('Assign user to account tests', () => {
@@ -52,6 +53,27 @@ describe('Assign user to account tests', () => {
     tick(100);
     expect((<any>comp).userService.getUsers).toHaveBeenCalledWith('sa');
   }));
+
+  it('returns no users for an undefined search', () => {
+    const search = spyOn((<any>comp).userService, 'getUsers');
+    comp.search = undefined;
+    comp.users$.subscribe(users => expect(users).toEqual([]));
+    expect(search).not.toHaveBeenCalled();
+  });
+
+  it('searches users for a matching query', () => {
+    const users = [{ logonId: 'test123' } as User];
+    const search = spyOn((<any>comp).userService, 'getUsers').and.returnValue(of(users));
+    comp.search = 'test';
+    comp.users$.subscribe(result => expect(result).toEqual(users));
+    expect(search).toHaveBeenCalledWith('test');
+  });
+
+  it('returns no users when the search fails', () => {
+    spyOn((<any>comp).userService, 'getUsers').and.returnValue(throwError(() => new Error('unavailable')));
+    comp.search = 'test';
+    comp.users$.subscribe(users => expect(users).toEqual([]));
+  });
 
   it('should assign user to account', () => {
     spyOn((<any>comp).accountService, 'addAccountUser').and.callThrough();
