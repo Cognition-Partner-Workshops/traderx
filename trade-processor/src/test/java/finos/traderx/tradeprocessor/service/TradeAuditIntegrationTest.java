@@ -12,8 +12,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import finos.traderx.messaging.Publisher;
 import finos.traderx.tradeprocessor.model.Position;
@@ -26,6 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @DataJpaTest(properties = {
     "spring.datasource.url=jdbc:h2:mem:FSX_20261105_FS14;DB_CLOSE_DELAY=-1",
@@ -41,6 +45,7 @@ import static org.mockito.Mockito.doAnswer;
 class TradeAuditIntegrationTest {
     @Autowired private TradeService service;
     @Autowired private JdbcTemplate jdbc;
+    @Autowired private PlatformTransactionManager transactionManager;
     @SpyBean private PositionRepository positions;
     @MockBean(name = "tradePublisher") private Publisher<Trade> tradePublisher;
     @MockBean(name = "positionPublisher") private Publisher<Position> positionPublisher;
@@ -91,5 +96,32 @@ class TradeAuditIntegrationTest {
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM TradeAudit", Integer.class)).isZero();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM Trades WHERE AccountID = 44044", Integer.class)).isZero();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM Positions WHERE AccountID = 44044", Integer.class)).isZero();
+        verifyNoInteractions(tradePublisher, positionPublisher);
+    }
+
+    @Test
+    void publishesOnlyAfterSuccessfulCommit() throws Exception {
+        var result = new TransactionTemplate(transactionManager).execute(status -> {
+            var booking = service.processTrade(new TradeOrder("request", 44044, "MS", TradeSide.Buy, 42));
+            verifyNoInteractions(tradePublisher, positionPublisher);
+            return booking;
+        });
+
+        verify(tradePublisher).publish("/accounts/44044/trades", result.getTrade());
+        verify(positionPublisher).publish("/accounts/44044/positions", result.getPosition());
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM TradeAudit", Integer.class)).isEqualTo(1);
+    }
+
+    @Test
+    void doesNotPublishWhenCompletedBookingRollsBack() {
+        new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+            service.processTrade(new TradeOrder("request", 44044, "MS", TradeSide.Buy, 42));
+            verifyNoInteractions(tradePublisher, positionPublisher);
+            status.setRollbackOnly();
+        });
+
+        verifyNoInteractions(tradePublisher, positionPublisher);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM TradeAudit", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM Trades WHERE AccountID = 44044", Integer.class)).isZero();
     }
 }

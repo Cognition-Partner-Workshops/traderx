@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
 
 import finos.traderx.messaging.PubSubException;
@@ -80,6 +82,21 @@ public class TradeService {
 
 		TradeBookingResult result=new TradeBookingResult(t, position);
 		log.info("Trade Processing complete : "+result);
+		if (TransactionSynchronizationManager.isActualTransactionActive()
+				&& TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					publish(order, result);
+				}
+			});
+		} else {
+			publish(order, result);
+		}
+		return result;
+	}
+
+	private void publish(TradeOrder order, TradeBookingResult result) {
 		try{
 			log.info("Publishing : "+result);
 			tradePublisher.publish("/accounts/"+order.getAccountId()+"/trades", result.getTrade());
@@ -88,7 +105,6 @@ public class TradeService {
 			log.error("Error publishing trade "+order,exc);
 		}
 		
-		return result;	
 	}
 
 }
