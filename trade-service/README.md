@@ -23,6 +23,14 @@ so no need to override them if you are happy with these values!
 
 Set `TRADE_FEED_PUBLISH_TOKEN` to the same shared secret configured on trade-feed.
 
+Set `TRADE_SERVICE_JWT_JWK_SET_URI` to the trusted identity provider's JWK set URL
+(required; the service fails at startup if it is blank). Optionally set
+`TRADE_SERVICE_JWT_ISSUER` to require a matching JWT issuer. JWT signatures and
+token timestamps are validated. Callers of `POST /trade/` and all other non-public
+routes must send `Authorization: Bearer <JWT>`; missing or invalid tokens receive
+401. Only `/`, Swagger UI, `/v3/api-docs` (including subpaths), and actuator health
+paths are public. CORS preflight requests are supported.
+
 Or you can also use command line arguments:
     
    $ gradlew bootRun --args='--TRADING_SERVICE_PORT=XXXX'
