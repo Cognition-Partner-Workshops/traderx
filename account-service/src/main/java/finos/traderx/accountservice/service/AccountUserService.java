@@ -12,6 +12,7 @@ import finos.traderx.accountservice.repository.AccountRepository;
 import finos.traderx.accountservice.repository.AccountUserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -52,7 +53,11 @@ public class AccountUserService {
 		if (this.accountUserRepository.existsByAccountIdAndUsername(accountUser.getAccountId(), accountUser.getUsername())) {
 			throw new AccountUserConflictException();
 		}
-		return this.accountUserRepository.save(accountUser);
+		try {
+			return this.accountUserRepository.save(accountUser);
+		} catch (DataIntegrityViolationException e) {
+			throw new AccountUserConflictException();
+		}
 	}
 
 	public AccountUser updateAccountUser(AccountUser accountUser) {
