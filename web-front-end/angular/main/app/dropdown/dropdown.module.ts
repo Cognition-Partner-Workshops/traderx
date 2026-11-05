@@ -9,7 +9,7 @@ import { DropdownComponent } from "./dropdown.component";
     declarations: [DropdownComponent],
     imports: [CommonModule,
         BrowserAnimationsModule,
-        BsDropdownModule.forRoot()],
+        BsDropdownModule],
     exports: [DropdownComponent]
 })
 export class DropdownModule { }

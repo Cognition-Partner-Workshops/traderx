@@ -14,5 +14,13 @@
     "include": [
         "main/**/*.spec.ts",
         "main/**/*.d.ts"
-    ]
+    ],
+    "angularCompilerOptions": {
+      "extendedDiagnostics": {
+        "checks": {
+          "nullishCoalescingNotNullable": "suppress",
+          "optionalChainNotNullable": "suppress"
+        }
+      }
+    }
 }

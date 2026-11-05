@@ -23,8 +23,8 @@ describe('TradeComponent', () => {
             imports: [
                 FormsModule,
                 DropdownModule,
-                ModalModule.forRoot(),
-                AlertModule.forRoot()
+                ModalModule,
+                AlertModule
             ],
             providers: [
                 {

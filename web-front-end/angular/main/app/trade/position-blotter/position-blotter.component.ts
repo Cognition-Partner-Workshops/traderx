@@ -1,5 +1,5 @@
 import { ColDef, GridApi, GridReadyEvent, GetRowIdParams } from 'ag-grid-community';
-import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Account } from 'main/app/model/account.model';
 import { Position } from 'main/app/model/trade.model';
 import { PositionService } from 'main/app/service/position.service';
@@ -7,9 +7,11 @@ import { Observable } from 'rxjs';
 import { TradeFeedService } from 'main/app/service/trade-feed.service';
 
 @Component({
-  selector: 'app-position-blotter',
-  templateUrl: './position-blotter.component.html',
-  styleUrls: ['./position-blotter.component.scss']
+    selector: 'app-position-blotter',
+    templateUrl: './position-blotter.component.html',
+    styleUrls: ['./position-blotter.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class PositionBlotterComponent implements OnChanges, OnDestroy {
   @Input() account?: Account;

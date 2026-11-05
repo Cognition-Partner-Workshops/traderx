@@ -19,9 +19,9 @@ import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
     CommonModule,
     AgGridModule,
     BrowserAnimationsModule,
-    TypeaheadModule.forRoot(),
-    ModalModule.forRoot(),
-    AlertModule.forRoot(),
+    TypeaheadModule,
+    ModalModule,
+    AlertModule,
     FormsModule,
     DropdownModule
   ],

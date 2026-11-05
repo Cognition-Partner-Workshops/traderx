@@ -16,7 +16,7 @@ describe('Account add/update tests', () => {
       TestBed.configureTestingModule({
         declarations: [EditAccountComponent],
         imports: [
-            AlertModule.forRoot(),
+            AlertModule,
             FormsModule
         ],
         providers: [

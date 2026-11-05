@@ -1,5 +1,5 @@
 import { ColDef, GridApi, GridReadyEvent, Module } from 'ag-grid-community';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AgGridModule } from 'ag-grid-angular';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AccountService } from '../service/account.service';
@@ -12,7 +12,9 @@ import { UserService } from '../service/user.service';
 @Component({
     selector: 'app-account',
     templateUrl: 'account.component.html',
-    styleUrls: ['account.component.scss']
+    styleUrls: ['account.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class AccountComponent implements OnInit {
     private gridApi!: GridApi;

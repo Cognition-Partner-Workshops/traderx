@@ -1,11 +1,13 @@
-import { Component, Output, EventEmitter, Input } from '@angular/core';
+import { Component, Output, EventEmitter, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Account } from 'main/app/model/account.model';
 import { AccountService } from 'main/app/service/account.service';
 
 @Component({
     selector: 'app-edit-account',
     templateUrl: 'edit.component.html',
-    styleUrls: ['edit.component.scss']
+    styleUrls: ['edit.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class EditAccountComponent {
     @Output() update = new EventEmitter<Account>();
