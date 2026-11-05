@@ -7,10 +7,17 @@
  * in the user manual at https://docs.gradle.org/8.4/userguide/multi_project_builds.html
  */
 
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven-central.storage-download.googleapis.com/maven2' }
+        gradlePluginPortal()
+    }
+}
+
 dependencyResolutionManagement {
     repositories {
         // Use Maven Central for resolving dependencies.
-        mavenCentral()
+        mavenCentral { url = 'https://maven-central.storage-download.googleapis.com/maven2' }
     }
 }
 
