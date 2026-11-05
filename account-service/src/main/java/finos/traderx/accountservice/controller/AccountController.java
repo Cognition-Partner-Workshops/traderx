@@ -52,11 +52,11 @@ public class AccountController {
 
 	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<String> resourceNotFoundExceptionMapper(ResourceNotFoundException e) {
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found.");
 	}
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<String> generalError(Exception e) {
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		return GlobalExceptionHandler.serverError(e);
 	}
 }

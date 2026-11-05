@@ -22,6 +22,8 @@ const SUBSCRIBE = "subscribe";
 const UNSUBSCRIBE = "unusbscribe";
 const PUBLISH = "publish";
 
+const safeLogValue = (value) => String(value).replace(/[\r\n]/g, '_');
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
@@ -46,19 +48,19 @@ function leaveMessage(user,topic){
 
 function broadcast(from, data) {
   var message=wrapMessage(from,data.topic,data.type,data.payload);
-  log.info(`Publish ${data.topic} -> ${JSON.stringify(message)}`);
+  log.info('Publish', { topic: safeLogValue(message.topic), type: safeLogValue(message.type) });
   io.sockets.in([data.topic, "/*"]).emit(PUBLISH, message);
 }
 
 io.on('connection', (socket) => {
-  log.info(`New Connection from ${socket.id}`);
+  log.info('New connection', { socketId: safeLogValue(socket.id) });
   socket.on(SUBSCRIBE, (topic) => {
-    log.info(`Subscribe ${topic}`);
+    log.info('Subscribe', { topic: safeLogValue(topic) });
     socket.join(topic);
     broadcast('System', joinMessage(socket.id,topic));
   });
   socket.on(UNSUBSCRIBE, (topic) => {
-    log.info(`Unsubscribe ${topic}`);
+    log.info('Unsubscribe', { topic: safeLogValue(topic) });
     broadcast('System', leaveMessage(socket.id,topic));
     socket.leave(topic);
   });

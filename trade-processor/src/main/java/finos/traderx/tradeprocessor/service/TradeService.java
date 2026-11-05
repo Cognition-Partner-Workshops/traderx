@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import finos.traderx.logging.SafeLog;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class TradeService {
     private Publisher<Position> positionPublisher;
     
 	public TradeBookingResult processTrade(TradeOrder order) {
-		log.info("Trade order received : "+order);
+		log.info("Trade order received");
         Trade t=new Trade();
         t.setAccountId(order.getAccountId());
 
@@ -48,9 +49,9 @@ public class TradeService {
         t.setQuantity(order.getQuantity());
 		t.setState(TradeState.New);
 		Position position=positionRepository.findByAccountIdAndSecurity(order.getAccountId(), order.getSecurity());
-		log.info("Position for "+order.getAccountId()+" "+order.getSecurity()+" is "+position);
+		log.info("Position lookup for account {} security {}", order.getAccountId(), SafeLog.value(order.getSecurity()));
 		if(position==null) {
-			log.info("Creating new position for "+order.getAccountId()+" "+order.getSecurity());
+			log.info("Creating new position for account {} security {}", order.getAccountId(), SafeLog.value(order.getSecurity()));
 			position=new Position();
 			position.setAccountId(order.getAccountId());
 			position.setSecurity(order.getSecurity());
@@ -58,7 +59,7 @@ public class TradeService {
 		}
 		int newQuantity=((order.getSide()==TradeSide.Buy)?1:-1)*t.getQuantity();
 		position.setQuantity(position.getQuantity()+newQuantity);
-		log.info("Trade {}",t);
+		log.info("Saving trade");
 		tradeRepository.save(t);
 		positionRepository.save(position);
 		// Simulate the handling of this trade...
@@ -72,13 +73,13 @@ public class TradeService {
 		
 
 		TradeBookingResult result=new TradeBookingResult(t, position);
-		log.info("Trade Processing complete : "+result);
+		log.info("Trade processing complete");
 		try{
-			log.info("Publishing : "+result);
+			log.info("Publishing trade and position");
 			tradePublisher.publish("/accounts/"+order.getAccountId()+"/trades", result.getTrade());
 			positionPublisher.publish("/accounts/"+order.getAccountId()+"/positions", result.getPosition());
 		} catch (PubSubException exc){
-			log.error("Error publishing trade "+order,exc);
+			log.error("Error publishing trade: {}", SafeLog.exception(exc));
 		}
 		
 		return result;	

@@ -1,6 +1,7 @@
 package finos.traderx.tradeprocessor;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import finos.traderx.logging.SafeLog;
 import org.springframework.core.ParameterizedTypeReference;
 
 import finos.traderx.messaging.Envelope;
@@ -22,8 +23,7 @@ public class TradeFeedHandler extends SocketIOJSONSubscriber<TradeOrder> {
         try{
             tradeService.processTrade(order);
         } catch (Exception x){
-            log.error("Error processing trade order {} in envelope {}",order,envelope);
-            log.error("Error handling incoming trade order:",x);
+            log.error("Error handling incoming trade order: {}", SafeLog.exception(x));
         }
        
     }

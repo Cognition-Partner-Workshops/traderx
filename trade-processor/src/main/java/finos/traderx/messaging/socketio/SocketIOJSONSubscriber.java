@@ -65,7 +65,7 @@ public abstract class SocketIOJSONSubscriber<T> implements Subscriber<T>, Initia
 
     @Override
     public void subscribe(String topic) throws PubSubException {
-        log.info("Subscribing to " + topic);
+        log.info("Subscribing to {}", finos.traderx.logging.SafeLog.value(topic));
         socket.emit("subscribe", topic);
     }
 
@@ -123,18 +123,17 @@ public abstract class SocketIOJSONSubscriber<T> implements Subscriber<T>, Initia
             public void call(Object... args) {
                 try {
                     JSONObject json = (JSONObject) args[0]; 
-                    log.info("Raw Payload " + args[0].toString());
                     if(! objectType.getSimpleName().equals(json.get("type"))){
-                        log.info("System Message>>>>> " + args[0].toString());
+                        log.info("System message received");
                     } else {
                         SocketIOEnvelope<T> envelope = (SocketIOEnvelope<T>) objectMapper.readValue(json.toString(),  envelopeType);
-                        log.info("Incoming Payload: " + envelope.getPayload());
+                        log.info("Incoming message type {}", finos.traderx.logging.SafeLog.value(objectType.getSimpleName()));
                         SocketIOJSONSubscriber.this.onMessage(envelope, envelope.getPayload());
                     }
 
                    
                 } catch (Exception x) {
-                    log.error("Threw exception while handling incoming message", x);
+                    log.error("Threw exception while handling incoming message: {}", finos.traderx.logging.SafeLog.exception(x));
                 }
                 log.info("Connection Error");
             }

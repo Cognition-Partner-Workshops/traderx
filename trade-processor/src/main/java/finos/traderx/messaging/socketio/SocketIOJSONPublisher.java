@@ -64,7 +64,7 @@ public abstract class SocketIOJSONPublisher<T> implements Publisher<T>, Initiali
             SocketIOEnvelope<T> envelope = new SocketIOEnvelope<T>(topic, message);
             String msgString = objectMapper.writerFor(SocketIOEnvelope.class).writeValueAsString(envelope);
             JSONObject obj = new JSONObject(msgString);
-            log.debug("PUBLISH->" + obj);
+            log.debug("Publishing message");
             socket.emit("publish", obj);
         } catch (Exception x) {
             x.printStackTrace();
@@ -100,7 +100,7 @@ public abstract class SocketIOJSONPublisher<T> implements Publisher<T>, Initiali
             @Override
             public void call(Object... args) {
                 SocketIOJSONPublisher.this.connected = true;
-                log.info("Socket Connected {}", args);
+                log.info("Socket connected");
             }
         });
 
@@ -108,7 +108,7 @@ public abstract class SocketIOJSONPublisher<T> implements Publisher<T>, Initiali
             @Override
             public void call(Object... args) {
                 SocketIOJSONPublisher.this.connected = false;
-                log.info("Socket Disconnected {}", args);
+                log.info("Socket disconnected");
             }
         });
 
@@ -116,7 +116,7 @@ public abstract class SocketIOJSONPublisher<T> implements Publisher<T>, Initiali
             @Override
             public void call(Object... args) {
                 SocketIOJSONPublisher.this.connected = false;
-                log.info("Connection Error {}", args);
+                log.info("Connection error");
             }
         });
         socket.connect();

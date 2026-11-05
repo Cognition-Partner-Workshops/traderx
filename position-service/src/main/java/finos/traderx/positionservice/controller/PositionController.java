@@ -38,6 +38,6 @@ public class PositionController {
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<String> generalError(Exception e) {
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		return GlobalExceptionHandler.serverError(e);
 	}
 }

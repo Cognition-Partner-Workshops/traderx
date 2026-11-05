@@ -1,6 +1,7 @@
 package finos.traderx.accountservice.controller;
 
 import java.util.List;
+import finos.traderx.logging.SafeLog;
 
 import finos.traderx.accountservice.exceptions.ResourceNotFoundException;
 import finos.traderx.accountservice.model.AccountUser;
@@ -72,15 +73,15 @@ public class AccountUserController {
 
 		try {
 			response = this.restTemplate.getForEntity(url, Person.class);
-			logger.info("Validaded person " + response.getBody().toString());
+			logger.info("Person validated");
 			return true;
 		}
 		catch (HttpClientErrorException ex) {
 			if (ex.getRawStatusCode() == 404) {
-				logger.info(username + " not found in People service.");
+				logger.info("Person {} not found in People service.", SafeLog.value(username));
 			}
 			else {
-				logger.error(ex.getMessage());
+				logger.error("People service request failed: {}", SafeLog.exception(ex));
 			}
 			return false;
 		}
@@ -88,11 +89,11 @@ public class AccountUserController {
 
 	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<String> resourceNotFoundExceptionMapper(ResourceNotFoundException e) {
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account user or person not found.");
 	}
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<String> generalError(Exception e) {
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		return GlobalExceptionHandler.serverError(e);
 	}
 }
