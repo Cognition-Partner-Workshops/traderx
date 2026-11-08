@@ -19,4 +19,6 @@ RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/
 
 # [Optional] Uncomment this line to install global node packages.
 # RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g <your-package-here>" 2>&1
-ENTRYPOINT cd PeopleService.WebApi && dotnet run
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://0.0.0.0:18089
+ENTRYPOINT cd PeopleService.WebApi && dotnet run --no-launch-profile
