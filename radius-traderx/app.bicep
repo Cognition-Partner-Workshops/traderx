@@ -3,6 +3,15 @@ extension radius
 // Parameters
 param application string
 
+@secure()
+@minLength(1)
+@description('H2 username for DATABASE_DBUSER; supplied by the operator at deploy time')
+param databaseUsername string
+
+@secure()
+@description('H2 password for DATABASE_DBPASS; supplied by the operator at deploy time')
+param databasePassword string
+
 resource database 'Applications.Core/containers@2023-10-01-preview' = {
   name: 'database'
   properties: {
@@ -13,11 +22,13 @@ resource database 'Applications.Core/containers@2023-10-01-preview' = {
         tcp: {
           containerPort: 18082
         }
-        pg:{
-          containerPort: 18083
+      }
+      env: {
+        DATABASE_DBUSER: {
+          value: databaseUsername
         }
-        web: {
-          containerPort: 18084
+        DATABASE_DBPASS: {
+          value: databasePassword
         }
       }
     }
@@ -81,6 +92,12 @@ resource accountservice 'Applications.Core/containers@2023-10-01-preview' = {
         }
       }
       env: {
+        DATABASE_DBUSER: {
+          value: databaseUsername
+        }
+        DATABASE_DBPASS: {
+          value: databasePassword
+        }
         DATABASE_TCP_HOST: {
           value: database.name
         }
@@ -112,6 +129,12 @@ resource positionservice 'Applications.Core/containers@2023-10-01-preview' = {
         }
       }
       env: {
+        DATABASE_DBUSER: {
+          value: databaseUsername
+        }
+        DATABASE_DBPASS: {
+          value: databasePassword
+        }
         DATABASE_TCP_HOST: {
           value: database.name
         }
@@ -186,6 +209,12 @@ resource tradeprocessor 'Applications.Core/containers@2023-10-01-preview' = {
         }
       }
       env: {
+        DATABASE_DBUSER: {
+          value: databaseUsername
+        }
+        DATABASE_DBPASS: {
+          value: databasePassword
+        }
         DATABASE_TCP_HOST: {
           value: database.name
         }
